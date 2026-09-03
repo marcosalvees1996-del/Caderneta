@@ -1,0 +1,13 @@
+{
+  "name": "caderneta-de-sala",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aplicativo de sala de aula: participacao, ocorrencias e fechamento de nota",
+  "scripts": {
+    "test": "node testes/rodar-tudo.js"
+  },
+  "devDependencies": {
+    "canvas": "^3.0.0",
+    "jsdom": "^26.0.0"
+  }
+}
