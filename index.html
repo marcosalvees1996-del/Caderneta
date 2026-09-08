@@ -86,6 +86,7 @@ h2{font-size:15px;margin:0 0 4px;font-weight:600}
   overflow:hidden;display:flex;align-items:center;justify-content:center;
   color:var(--tinta-fraca);font-weight:600}
 .av img{width:100%;height:100%;object-fit:cover;display:block}
+.av svg{width:100%;height:100%;display:block}
 .av-p{width:34px;height:34px;font-size:12px}
 .av-m{width:44px;height:44px;font-size:15px}
 .perfil{display:flex;align-items:center;gap:14px;margin-bottom:6px}
@@ -719,14 +720,31 @@ $("#selCtx").addEventListener("change", function(){
 $("#selData").addEventListener("change", function(){ dataAtual = this.value || hoje(); pintarAula(); });
 
 /* ================= avatar ================= */
+var PALETA_AVATAR = ["#4A5D8A","#3E7A66","#6B4F82","#8A6238","#3E6E86","#75662E"];
 function iniciais(nome){
   var p = String(nome||"").trim().split(/\s+/);
   if(!p[0]) return "?";
   return (p[0][0] + (p.length>1 ? p[p.length-1][0] : "")).toUpperCase();
 }
+function corAvatar(nome){
+  var s = String(nome||""), h = 0;
+  for(var i=0;i<s.length;i++){ h = (h*31 + s.charCodeAt(i)) | 0; }
+  return PALETA_AVATAR[Math.abs(h) % PALETA_AVATAR.length];
+}
+function avatarConteudo(a){
+  if(a && a.foto) return '<img src="'+a.foto+'" alt="">';
+  return '<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">'
+    + '<circle cx="50" cy="38" r="17" fill="#fff" opacity=".3"/>'
+    + '<path d="M18,94 C18,68 31,57 50,57 C69,57 82,68 82,94 Z" fill="#fff" opacity=".3"/>'
+    + '<text x="50" y="58" text-anchor="middle" dy=".28em" font-size="36" font-weight="700" '
+    + 'font-family="-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Arial,sans-serif" fill="#fff">'
+    + esc(iniciais(a?a.nome:"")) + '</text></svg>';
+}
+function avatarFundo(a){
+  return (a && a.foto) ? "" : ' style="background:'+corAvatar(a?a.nome:"")+'"';
+}
 function avatar(a, tam){
-  return '<span class="av av-'+(tam||"p")+'">'
-    + (a && a.foto ? '<img src="'+a.foto+'" alt="">' : esc(iniciais(a?a.nome:""))) + '</span>';
+  return '<span class="av av-'+(tam||"p")+'"'+avatarFundo(a)+'>' + avatarConteudo(a) + '</span>';
 }
 function recortarQuadrado(arquivo, pronto){
   if(!arquivo || !arquivo.type || arquivo.type.indexOf("image") !== 0) return;
@@ -1155,8 +1173,8 @@ function painelAluno(aid){
   var a = aluno(discAtual, aid), A = db.aval, r0 = calcular();
   abrir(
     '<div class="perfil" style="gap:11px;margin-bottom:10px">'
-    + '<span class="av av-m" style="width:52px;height:52px;font-size:17px">'
-    + (a.foto?'<img src="'+a.foto+'" alt="">':esc(iniciais(a.nome)))+'</span>'
+    + '<span class="av av-m" style="width:52px;height:52px'+(a.foto?'':';background:'+corAvatar(a.nome))+'">'
+    + avatarConteudo(a)+'</span>'
     + '<span><h3 style="margin:0">'+esc(a.nome)+'</h3>'
     + '<p class="quem" id="pnResumo" style="margin:2px 0 0"></p></span></div>'
     + '<h2 style="margin-top:6px">Nota por bimestre</h2><div id="grBim"></div>'
@@ -1306,8 +1324,8 @@ function verPasta(aid){
   }).join("") : '<p class="vazio">Nenhum registro ainda.</p>';
 
   abrir(
-    '<div class="perfil"><span class="av av-g" id="pAv">'
-    + (a.foto?'<img src="'+a.foto+'" alt="">':esc(iniciais(a.nome)))
+    '<div class="perfil"><span class="av av-g" id="pAv"'+(a.foto?'':' style="background:'+corAvatar(a.nome)+'"')+'>'
+    + avatarConteudo(a)
     + '<button class="cam" id="pCam" aria-label="Trocar foto">+</button></span>'
     + '<span><h3 style="margin:0">'+esc(a.nome)+'</h3>'
     + '<p class="quem" style="margin:2px 0 0">'+esc(rotuloCtx(discAtual))+'<br>'+part+' participações</p></span></div>'

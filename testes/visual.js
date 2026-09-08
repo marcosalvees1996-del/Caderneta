@@ -92,5 +92,53 @@ ok("V.22 cartao do aluno mantem altura de toque", /\.aluno\{[^}]*min-height:58px
 ok("V.23 botoes mantem 44px", /\.bt\{[^}]*min-height:44px/.test(css));
 ok("V.24 respeita reducao de movimento", /prefers-reduced-motion/.test(css));
 
+/* avatar sem foto: silhueta em SVG com cor estavel por aluno */
+function rgbParaHex(rgb){
+  const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(rgb||"");
+  if(!m) return (rgb||"").toUpperCase();
+  return "#"+m.slice(1,4).map(n=>(+n).toString(16).padStart(2,"0")).join("").toUpperCase();
+}
+a.aba("aula");
+const avGrade = a.todos("#grade .av");
+ok("V.25 avatar sem foto e SVG, nao img", avGrade.length===4
+  && avGrade.every(el=>!!el.querySelector("svg") && !el.querySelector("img")));
+ok("V.26 iniciais aparecem dentro do SVG", /AS/.test(avGrade[0].textContent) && /BC/.test(avGrade[1].textContent));
+const paletaAv = a.w.eval("PALETA_AVATAR");
+ok("V.27 paleta discreta de 6 cores", Array.isArray(paletaAv) && paletaAv.length===6);
+const coresGrade = avGrade.map(el=>rgbParaHex(el.style.background));
+ok("V.28 cor do avatar sempre vem da paleta", coresGrade.every(c=>paletaAv.map(x=>x.toUpperCase()).indexOf(c)>=0),
+   coresGrade.join(","));
+ok("V.29 lista com mais de uma cor entre alunos diferentes", new Set(coresGrade).size>1, coresGrade.join(","));
+
+a.aba("alunos");
+const coresLista = a.todos("#listaAlunos .av").map(el=>rgbParaHex(el.style.background));
+ok("V.30 cor de cada aluno e estavel entre a grade e a lista", coresLista.join(",")===coresGrade.join(","),
+   coresLista.join(",")+" / "+coresGrade.join(","));
+
+/* pasta grande usa a mesma cor e tambem SVG quando sem foto */
+a.clique('#listaAlunos button[data-pasta]');
+ok("V.31 pasta grande usa SVG quando sem foto", !!a.q("#pAv svg") && !a.q("#pAv img"));
+ok("V.32 cor da pasta grande e a mesma da lista", rgbParaHex(a.q("#pAv").style.background)===coresLista[0]);
+a.clique("#pFechar");
+
+/* painel do aluno, aberto pela aba Notas, tambem usa avatar SVG com a mesma cor */
+a.aba("notas");
+const btAbrir = a.q("#listaNotas button.abrir-al");
+ok("V.33 aba Notas tem botao para abrir o painel do aluno", !!btAbrir);
+if(btAbrir) btAbrir.click();
+const avPainel = a.q(".perfil .av-m");
+ok("V.34 painel do aluno usa SVG quando sem foto", !!avPainel && !!avPainel.querySelector("svg") && !avPainel.querySelector("img"));
+ok("V.35 cor do painel do aluno e estavel", !!avPainel && rgbParaHex(avPainel.style.background)===coresGrade[0]);
+a.clique("#pnFechar");
+
+/* ocorrencia tambem mostra avatar SVG com a cor do aluno */
+a.aba("oco"); a.clique("#btNovaOco");
+a.escreve("#oFato","Recusou-se a devolver o material emprestado ao colega.");
+a.escreve("#oProv","Conversa reservada ao final da aula.");
+a.clique("#oOk");
+a.clique("#oFech");
+const avOco = a.q("#listaOco .av");
+ok("V.36 lista de ocorrencias mostra avatar SVG quando sem foto", !!avOco && !!avOco.querySelector("svg") && !avOco.querySelector("img"));
+
 console.log("Passaram: "+p); console.log("Falharam: "+f.length);
 f.forEach(x=>console.log("  FALHA "+x));
