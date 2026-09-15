@@ -102,7 +102,7 @@ c.clique("#tOk");
 ok("Q.15 falhou como esperado", c.aberto());
 c.w.__limite = 0;
 c.clique("#tOk");
-ok("Q.16 depois de liberar, salva", !c.aberto() && c.db().turmas.some(t=>t.nome==="9º ano"));
+ok("Q.16 depois de liberar, salva", !c.q("#painel").classList.contains("mostrando") && c.db().turmas.some(t=>t.nome==="9º ano"));
 ok("Q.17 persistiu no armazenamento", (c.loja["caderneta"]||"").includes("9º ano"));
 c.aba("aula");
 ok("Q.18 faixa some apos voltar a salvar", !c.q("#faixaEspaco"));

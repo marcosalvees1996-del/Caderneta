@@ -52,9 +52,12 @@ nav button svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width
 nav button.on{color:var(--escola,#2B4C6F);border-top-color:var(--escola,#2B4C6F);font-weight:600}
 nav button.on svg{stroke-width:2.1}
 
-main{padding:14px}
+main{padding:14px;overflow-x:hidden}
 section{display:none}
 section.on{display:block}
+section.on.desliza-in{transition:transform .2s cubic-bezier(.4,0,.2,1),opacity .2s cubic-bezier(.4,0,.2,1)}
+section.on.desliza-d{transform:translateX(26px);opacity:0}
+section.on.desliza-e{transform:translateX(-26px);opacity:0}
 h2{font-size:15px;margin:0 0 4px;font-weight:600}
 .dica{font-size:13px;color:var(--tinta-fraca);margin:0 0 14px}
 .vazio{padding:26px 4px;color:var(--tinta-fraca);font-size:14px}
@@ -72,7 +75,8 @@ h2{font-size:15px;margin:0 0 4px;font-weight:600}
 .aluno .info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
 .aluno .nome{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;
   white-space:nowrap;font-size:15.5px;font-weight:600;background:none;border:0;
-  padding:0;text-align:left;color:inherit}
+  padding:0;text-align:left;color:inherit;transition:transform .1s cubic-bezier(.4,0,.2,1)}
+.aluno .nome:active{transform:scale(.94)}
 .aluno .sub{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   font-size:12px;color:var(--tinta-fraca);margin-top:1px}
 .aluno .cont{min-width:26px;height:26px;border-radius:13px;display:flex;
@@ -165,18 +169,28 @@ textarea{min-height:88px;resize:vertical}
 .fotos .x{position:absolute;top:-6px;right:-6px;width:23px;height:23px;border-radius:12px;
   background:var(--tinta);color:#fff;border:0;font-size:13px;line-height:1}
 
-.dialogo{position:fixed;inset:0;z-index:90;background:rgba(27,36,48,.55);
-  display:flex;align-items:center;justify-content:center;padding:22px}
+.dialogo{position:fixed;inset:0;z-index:90;background:rgba(27,36,48,0);
+  display:flex;align-items:center;justify-content:center;padding:22px;
+  transition:background .18s cubic-bezier(.4,0,.2,1)}
+.dialogo.mostrando{background:rgba(27,36,48,.55)}
 .dialogo .dcaixa{background:var(--papel);border-radius:12px;padding:18px 17px 15px;
-  max-width:420px;width:100%;box-shadow:0 8px 28px rgba(27,36,48,.3)}
+  max-width:420px;width:100%;box-shadow:0 8px 28px rgba(27,36,48,.3);
+  transform:scale(.92);opacity:0;
+  transition:transform .18s cubic-bezier(.4,0,.2,1),opacity .18s cubic-bezier(.4,0,.2,1)}
+.dialogo.mostrando .dcaixa{transform:scale(1);opacity:1}
 .dialogo p{margin:0 0 15px;font-size:15px;line-height:1.45}
 .dialogo .dbotoes{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 .dialogo .dbotoes .bt{min-height:46px}
 
-.painel{position:fixed;inset:0;z-index:60;background:rgba(27,36,48,.45);display:none;align-items:flex-end}
+.painel{position:fixed;inset:0;z-index:60;background:rgba(27,36,48,0);display:none;
+  align-items:flex-end;transition:background .22s cubic-bezier(.4,0,.2,1)}
 .painel.on{display:flex}
+.painel.mostrando{background:rgba(27,36,48,.45)}
 .painel .caixa{width:100%;max-height:92vh;overflow:auto;background:var(--papel);
-  border-radius:14px 14px 0 0;padding:16px 15px 26px}
+  border-radius:14px 14px 0 0;padding:16px 15px 26px;
+  transform:translateY(100%);transition:transform .22s cubic-bezier(.4,0,.2,1)}
+.painel.mostrando .caixa{transform:translateY(0)}
+.painel .caixa.arrastando{transition:none}
 .painel h3{margin:0 0 2px;font-size:17px}
 .painel .quem{font-size:13px;color:var(--tinta-fraca);margin:0 0 8px}
 
@@ -266,6 +280,13 @@ textarea{min-height:88px;resize:vertical}
   #doc .assina div{flex:1;border-top:1px solid #000;padding-top:5px;font-size:10pt;text-align:center}
   #doc img{max-width:70mm;margin:5px 6px 0 0;border:1px solid #999}
   #doc .rod{margin-top:26px;border-top:1px solid #000;padding-top:6px;font-size:9pt}
+}
+
+@media (prefers-reduced-motion:reduce){
+  main section.on.desliza-in,
+  .dialogo, .dialogo .dcaixa,
+  .painel, .painel .caixa,
+  .aluno .nome{ transition:none }
 }
 </style>
 </head>
@@ -774,13 +795,28 @@ function regsDe(did, aid){
 }
 
 /* ================= abas ================= */
+var ORDEM_ABAS = ["aula","alunos","notas","oco","dados"];
 var botoes = document.querySelectorAll("nav button");
 Array.prototype.forEach.call(botoes, function(b){
   b.addEventListener("click", function(){
+    var atual = document.querySelector("main section.on");
+    var atualIdx = atual ? ORDEM_ABAS.indexOf(atual.id.slice(3)) : -1;
+    var novoIdx = ORDEM_ABAS.indexOf(this.dataset.ab);
+    var direcao = novoIdx > atualIdx ? "desliza-d" : "desliza-e";
+
     Array.prototype.forEach.call(botoes, function(x){ x.classList.remove("on"); });
     this.classList.add("on");
-    Array.prototype.forEach.call(document.querySelectorAll("main section"), function(s){ s.classList.remove("on"); });
-    $("#ab-"+this.dataset.ab).classList.add("on");
+    Array.prototype.forEach.call(document.querySelectorAll("main section"), function(s){
+      s.classList.remove("on","desliza-in","desliza-d","desliza-e");
+    });
+    var nova = $("#ab-"+this.dataset.ab);
+    nova.classList.add(direcao);
+    nova.classList.add("on");
+    void nova.offsetWidth;
+    nova.classList.add("desliza-in");
+    nova.classList.remove(direcao);
+    setTimeout(function(){ nova.classList.remove("desliza-in"); }, 220);
+
     window.scrollTo(0,0);
     if(this.dataset.ab==="alunos") pintarAlunos();
     if(this.dataset.ab==="notas") pintarNotas();
@@ -789,9 +825,73 @@ Array.prototype.forEach.call(botoes, function(b){
   });
 });
 
-function abrir(html){ $("#caixa").onclick = null; $("#caixa").innerHTML = html; $("#painel").classList.add("on"); }
-function fechar(){ $("#painel").classList.remove("on"); }
+var painelFechando = null;
+function abrir(html){
+  var p = $("#painel"), caixa = $("#caixa");
+  if(painelFechando){ clearTimeout(painelFechando); painelFechando = null; }
+  caixa.onclick = null;
+  caixa.classList.remove("arrastando");
+  caixa.style.transform = "";
+  caixa.innerHTML = html;
+  caixa.scrollTop = 0;
+  p.classList.add("on");
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ p.classList.add("mostrando"); });
+  });
+}
+function fechar(){
+  var p = $("#painel"), caixa = $("#caixa");
+  if(!p.classList.contains("on")) return;
+  if(painelFechando){ clearTimeout(painelFechando); }
+  caixa.classList.remove("arrastando");
+  p.classList.remove("mostrando");
+  caixa.style.transform = "translateY(100%)";
+  painelFechando = setTimeout(function(){
+    p.classList.remove("on");
+    caixa.style.transform = "";
+    painelFechando = null;
+  }, 220);
+}
 $("#painel").addEventListener("click", function(e){ if(e.target === this) fechar(); });
+
+/* ---- arrastar o painel para baixo fecha, acompanhando o dedo ---- */
+(function(){
+  var caixa = $("#caixa"), p = $("#painel");
+  var y0 = 0, dyAtual = 0, tocando = false, arrastando = false, t0 = 0;
+  caixa.addEventListener("touchstart", function(e){
+    if(!p.classList.contains("mostrando")) return;
+    tocando = true; arrastando = false; dyAtual = 0;
+    y0 = e.touches[0].clientY; t0 = Date.now();
+  }, {passive:true});
+  caixa.addEventListener("touchmove", function(e){
+    if(!tocando) return;
+    var dy = e.touches[0].clientY - y0;
+    if(!arrastando){
+      if(caixa.scrollTop > 0) return;
+      if(dy <= 6) return;
+      arrastando = true;
+    }
+    dyAtual = Math.max(0, dy);
+    e.preventDefault();
+    caixa.classList.add("arrastando");
+    caixa.style.transform = "translateY("+dyAtual+"px)";
+  }, {passive:false});
+  function soltar(){
+    if(!tocando) return;
+    tocando = false;
+    if(!arrastando) return;
+    arrastando = false;
+    var vel = dyAtual / Math.max(1, Date.now()-t0);
+    if(dyAtual > caixa.offsetHeight/3 || vel > 0.5){
+      fechar();
+    }else{
+      caixa.classList.remove("arrastando");
+      caixa.style.transform = "";
+    }
+  }
+  caixa.addEventListener("touchend", soltar);
+  caixa.addEventListener("touchcancel", soltar);
+})();
 
 /* ---- caixas próprias, sem depender de alert e confirm do navegador ---- */
 function fecharDialogo(){
@@ -812,6 +912,9 @@ function montarDialogo(texto, botoes){
     alvo.appendChild(el);
   });
   document.body.appendChild(d);
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ d.classList.add("mostrando"); });
+  });
   return d;
 }
 function avisar(texto, depois){

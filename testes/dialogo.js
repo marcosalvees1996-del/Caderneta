@@ -53,7 +53,7 @@ ok("D.8 painel da turma segue aberto", a.q("#painel").classList.contains("on"));
 a.clique("#tOk");
 a.botaoDialogo("Remover").click();
 ok("D.9 confirmar remove", a.db().turmas[0].alunos.length===2);
-ok("D.10 painel fecha apos salvar", !a.q("#painel").classList.contains("on"));
+ok("D.10 painel fecha apos salvar", !a.q("#painel").classList.contains("mostrando"));
 ok("D.11 persistiu", (a.loja["caderneta"]||"").includes("9º ano"));
 ok("D.12 nenhum dialogo nativo em todo o fluxo", !a.w.__nativoConfirm && !a.w.__nativoAlert);
 
