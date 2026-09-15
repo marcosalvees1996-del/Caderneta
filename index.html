@@ -62,23 +62,28 @@ h2{font-size:15px;margin:0 0 4px;font-weight:600}
 .busca{width:100%;padding:10px;margin-bottom:10px;background:#fff;
   border:1px solid var(--linha);border-radius:6px}
 
-.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
-.aluno{position:relative;min-height:58px;display:flex;align-items:center;gap:9px;
-  padding:9px 34px 9px 10px;background:#fff;border:1px solid var(--linha);
-  border-radius:9px;text-align:left;line-height:1.25}
+.grade{display:flex;flex-direction:column;gap:8px}
+.aluno{position:relative;min-height:58px;display:flex;align-items:center;gap:10px;
+  padding:8px 8px 8px 12px;background:#fff;border:1px solid var(--linha);
+  border-radius:12px;text-align:left;line-height:1.25}
 .aluno.pontuou{background:var(--verde-claro);border-color:#B9D8C9}
 .aluno.faltou{background:#F0EFEC;border-color:#D9D6CE;opacity:.72}
 .aluno.faltou .nome{text-decoration:line-through;color:var(--tinta-fraca)}
-.aluno .nome{flex:1;font-size:14.5px;font-weight:500;background:none;border:0;padding:0;text-align:left}
-.aluno .cont.zero{opacity:.55}
+.aluno .info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.aluno .nome{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;font-size:15.5px;font-weight:600;background:none;border:0;
+  padding:0;text-align:left;color:inherit}
+.aluno .sub{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:12px;color:var(--tinta-fraca);margin-top:1px}
 .aluno .cont{min-width:26px;height:26px;border-radius:13px;display:flex;
   align-items:center;justify-content:center;background:var(--verde);color:#fff;
   font-size:13px;font-weight:700;flex:none}
 .aluno .cont.zero{background:#E4E4DD;color:var(--tinta-fraca)}
 .aluno .cont.falta{background:#8A8A80;color:#fff}
-.aluno .mais{position:absolute;right:2px;top:50%;transform:translateY(-50%);
-  width:30px;height:100%;border:0;background:none;color:var(--tinta-fraca);
-  font-size:19px;line-height:1;border-left:1px dashed var(--linha)}
+.aluno .mais{flex:none;width:44px;height:44px;border-radius:50%;border:0;
+  background:var(--papel-alt);color:var(--tinta-fraca);display:flex;
+  align-items:center;justify-content:center}
+.aluno .mais svg{width:19px;height:19px}
 .aluno .flag{position:absolute;left:-1px;top:8px;bottom:8px;width:3px;
   border-radius:3px;background:var(--tijolo)}
 
@@ -288,7 +293,7 @@ textarea{min-height:88px;resize:vertical}
     </div>
     <div class="hojeBarra"><i id="hojeI"></i></div>
   </div>
-  <p class="dica">Toque no nome para somar participação. O sinal de mais abre etiquetas, descrição e fotos.</p>
+  <p class="dica">Toque no nome para somar participação. O ícone de nota abre etiquetas, descrição e fotos.</p>
   <input type="text" class="busca" id="buscaAula" placeholder="Buscar aluno na turma">
   <div class="grade" id="grade"></div>
   <div class="acoes">
@@ -795,15 +800,27 @@ function pintarAula(){
     else if(r.tipo==="participacao") comReg[r.alunoId] = (comReg[r.alunoId]||0)+1;
   });
 
+  var r0 = calcular();
+  var porAluno = {};
+  if(r0) r0.linhas.forEach(function(l){ porAluno[l.aluno.id] = l; });
+
   var visiveis = lista.filter(function(a){ return combina(a.nome, filtroAula); });
   g.innerHTML = visiveis.map(function(a){
     var n = comReg[a.id]||0, f = !!faltou[a.id];
     var temOco = doDia.some(function(r){ return r.alunoId===a.id && r.tipo==="ocorrencia"; });
+    var l = porAluno[a.id];
+    var sub = l ? (l.participacoes+" part."+(l.faltas?" · "+l.faltas+" faltas":"")) : "";
     return '<div class="aluno'+(f?" faltou":(n?" pontuou":""))+'">'
       + (temOco?'<span class="flag"></span>':'') + avatar(a,"p")
-      + '<button class="nome" data-add="'+a.id+'">'+esc(a.nome)+'</button>'
+      + '<span class="info"><button class="nome" data-add="'+a.id+'">'+esc(a.nome)+'</button>'
+      + '<span class="sub">'+esc(sub)+'</span></span>'
       + '<span class="cont'+(f?" falta":(n?"":" zero"))+'">'+(f?"F":n)+'</span>'
-      + '<button class="mais" data-det="'+a.id+'" aria-label="Detalhar">+</button></div>';
+      + '<button class="mais" data-det="'+a.id+'" aria-label="Detalhar participação de '+esc(a.nome)+'">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v10H9.5l-4 4v-4H4z" '
+      + 'fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>'
+      + '<line x1="7.5" y1="9" x2="16.5" y2="9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'
+      + '<line x1="7.5" y1="12" x2="13.5" y2="12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'
+      + '</svg></button></div>';
   }).join("") || '<p class="vazio">'+(lista.length?"Nenhum aluno com esse nome.":"Turma sem alunos. Edite na aba Dados.")+'</p>';
 
   $("#rTotal").textContent = doDia.filter(function(r){ return r.tipo==="participacao"; }).length;
