@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Caderneta de Sala</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2B4C6F">
+<link rel="icon" href="icons/icon-192.png">
 <style>
 :root{
   --escola:#43525E;
@@ -2680,6 +2683,31 @@ pintarPesos();
 pintarNotas();
 pintarDados();
 avisoBackup();
+
+/* ================= app instalavel ================= */
+function avisoVersaoNova(){
+  if(document.getElementById("faixaVersao")) return;
+  var el = document.createElement("div");
+  el.className = "faixa bkp"; el.id = "faixaVersao";
+  el.style.margin = "8px 14px 0";
+  el.innerHTML = '<span>Versão nova do app disponível.</span><button id="btVersaoNova">Recarregar</button>';
+  document.querySelector("header").appendChild(el);
+  el.querySelector("#btVersaoNova").addEventListener("click", function(){ window.location.reload(); });
+}
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").then(function(reg){
+      if(reg.waiting) avisoVersaoNova();
+      reg.addEventListener("updatefound", function(){
+        var novo = reg.installing;
+        if(!novo) return;
+        novo.addEventListener("statechange", function(){
+          if(novo.state === "installed" && navigator.serviceWorker.controller) avisoVersaoNova();
+        });
+      });
+    }).catch(function(){});
+  });
+}
 </script>
 </body>
 </html>
