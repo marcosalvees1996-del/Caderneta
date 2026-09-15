@@ -155,6 +155,7 @@ input[type=text],input[type=time],textarea,select{width:100%;padding:10px;backgr
 textarea{min-height:88px;resize:vertical}
 .aviso{font-size:12.5px;color:var(--tijolo);background:var(--tijolo-claro);
   border-left:3px solid var(--tijolo);padding:9px 11px;border-radius:0 6px 6px 0;margin:12px 0}
+.lacuna{border-color:var(--tijolo)}
 .nota{font-size:12.5px;color:var(--tinta-fraca);margin-top:5px}
 
 .fotos{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
@@ -509,6 +510,124 @@ var ETIQUETAS_PADRAO = [
     "Apresentou-se preparado para a atividade, com o material organizado e pronto para uso."]}
 ];
 
+var DISCIPLINAS_ETIQ = [
+  {chave:"geral", nome:"Geral (todas as disciplinas)"},
+  {chave:"arte", nome:"Arte"},
+  {chave:"educacao fisica", nome:"Educação Física"},
+  {chave:"jogos coletivos", nome:"Jogos Coletivos"},
+  {chave:"sociologia", nome:"Sociologia"},
+  {chave:"filosofia", nome:"Filosofia"},
+  {chave:"projeto de vida", nome:"Projeto de Vida"},
+  {chave:"matematica no cotidiano", nome:"Matemática no Cotidiano"}
+];
+
+var ETIQUETAS_POR_DISCIPLINA = {
+  "arte": [
+    {rot:"Explorou técnica nova", frases:[
+      "Experimentou uma técnica ainda não dominada, arriscando resultado diferente do habitual.",
+      "Testou material ou procedimento novo na produção, mesmo sem garantia do resultado final."]},
+    {rot:"Cuidou do material coletivo", frases:[
+      "Guardou e organizou o material coletivo ao final da aula, sem que fosse solicitado.",
+      "Usou o material compartilhado com cuidado, devolvendo-o em condição de uso para a próxima turma."]},
+    {rot:"Deu acabamento à produção", frases:[
+      "Retomou a produção em andamento para revisar detalhes e finalizar o acabamento.",
+      "Concluiu a etapa de acabamento da obra, cuidando de detalhes que elevam a qualidade final."]}
+  ],
+  "educacao fisica": [
+    {rot:"Respeitou as regras do jogo", frases:[
+      "Seguiu as regras combinadas para o jogo, mesmo em momentos de disputa acirrada.",
+      "Aceitou a marcação da arbitragem sem contestação, mantendo o jogo em andamento."]},
+    {rot:"Executou o gesto técnico", frases:[
+      "Executou o gesto técnico proposto com correção, após repetição orientada.",
+      "Aplicou o fundamento trabalhado na aula durante a situação de jogo."]},
+    {rot:"Incentivou os colegas na quadra", frases:[
+      "Incentivou os colegas durante a atividade, mantendo o clima da turma favorável ao jogo.",
+      "Reconheceu o desempenho de um colega em quadra, valorizando o esforço do grupo."]}
+  ],
+  "jogos coletivos": [
+    {rot:"Colaborou na tática do time", frases:[
+      "Cumpriu a função tática combinada pelo time durante a partida.",
+      "Ajustou sua posição em quadra conforme a orientação combinada com o grupo."]},
+    {rot:"Aceitou o resultado da partida", frases:[
+      "Aceitou o resultado da partida sem reclamação, cumprimentando o time adversário.",
+      "Manteve postura respeitosa diante da derrota, reconhecendo o desempenho do grupo."]},
+    {rot:"Revezou-se sem reclamar", frases:[
+      "Revezou-se no time conforme combinado, sem contestar a escalação.",
+      "Cedeu a vez a um colega na atividade, respeitando o critério de rodízio da turma."]}
+  ],
+  "sociologia": [
+    {rot:"Relacionou teoria e realidade", frases:[
+      "Relacionou o conceito estudado a uma situação concreta da realidade social observada.",
+      "Utilizou o referencial teórico da aula para analisar um fato social atual."]},
+    {rot:"Argumentou com dados", frases:[
+      "Sustentou sua posição na discussão com dado ou exemplo concreto, não apenas opinião.",
+      "Apresentou fonte ou referência para embasar o argumento defendido no debate."]},
+    {rot:"Respeitou opiniões divergentes", frases:[
+      "Ouviu posição divergente da sua no debate sem interromper o colega.",
+      "Reformulou seu argumento após ouvir contraponto de um colega, mantendo o respeito."]}
+  ],
+  "filosofia": [
+    {rot:"Problematizou o tema proposto", frases:[
+      "Formulou pergunta que colocou em questão um pressuposto aceito pela turma.",
+      "Identificou uma contradição no argumento discutido em aula."]},
+    {rot:"Construiu contra-argumento", frases:[
+      "Apresentou contra-argumento consistente à posição defendida por um colega.",
+      "Testou os limites de um argumento com um contraexemplo pertinente."]},
+    {rot:"Fez pergunta filosófica pertinente", frases:[
+      "Fez pergunta que ampliou a discussão para além do que fora inicialmente proposto.",
+      "Questionou o sentido de um conceito antes de aceitar sua aplicação."]}
+  ],
+  "projeto de vida": [
+    {rot:"Definiu meta pessoal", frases:[
+      "Definiu uma meta pessoal concreta e um prazo para persegui-la.",
+      "Revisou uma meta definida anteriormente, ajustando-a à sua realidade atual."]},
+    {rot:"Refletiu sobre escolha de carreira", frases:[
+      "Pesquisou uma área de interesse profissional e trouxe informação concreta à turma.",
+      "Relacionou uma habilidade pessoal a uma possibilidade de carreira."]},
+    {rot:"Elaborou plano de ação", frases:[
+      "Elaborou um plano de ação com etapas concretas para atingir o objetivo proposto.",
+      "Identificou um obstáculo ao seu plano e propôs uma forma de superá-lo."]}
+  ],
+  "matematica no cotidiano": [
+    {rot:"Aplicou cálculo a situação real", frases:[
+      "Aplicou o cálculo estudado a uma situação prática trazida para a aula.",
+      "Resolveu uma conta do cotidiano usando o procedimento trabalhado em aula."]},
+    {rot:"Resolveu problema prático", frases:[
+      "Resolveu um problema prático proposto, justificando o raciocínio utilizado.",
+      "Encontrou mais de um caminho para resolver a mesma situação prática."]},
+    {rot:"Interpretou gráfico ou tabela", frases:[
+      "Interpretou corretamente informação apresentada em gráfico ou tabela.",
+      "Construiu gráfico ou tabela a partir de dados coletados pela turma."]}
+  ]
+};
+
+var ETIQUETAS_OCO_FATO = [
+  {rot:"Recusa a orientação", texto:"Recusou-se a [o que] após [quantas] solicitações."},
+  {rot:"Uso de celular", texto:"Usou o celular sem autorização durante [qual momento da aula], mesmo após pedido para guardar."},
+  {rot:"Conversa paralela", texto:"Manteve conversa paralela durante [qual momento da aula], atrapalhando [quem]."},
+  {rot:"Dano a material", texto:"Danificou [qual material] durante [qual atividade]."},
+  {rot:"Fala inadequada", texto:"Dirigiu-se a [quem] com [que tipo de fala], durante [qual momento]."},
+  {rot:"Saída sem autorização", texto:"Saiu de [onde] sem autorização durante [qual momento da aula]."}
+];
+var ETIQUETAS_OCO_PROV = [
+  {rot:"Conversa reservada", texto:"Conversa reservada com o(a) estudante ao final da aula, orientando sobre [o que]."},
+  {rot:"Mudança de lugar", texto:"Mudança de lugar na sala, afastando de [quem]."},
+  {rot:"Contato com a família", texto:"Contato com a família por [meio], relatando o ocorrido."},
+  {rot:"Encaminhamento verbal", texto:"Encaminhamento verbal à coordenação, relatando o ocorrido."}
+];
+
+function normDisc(s){
+  return String(s||"").trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+}
+function temColchetes(s){ return /\[[^\]]*\]/.test(s||""); }
+function etiquetasPara(discId){
+  var d = disciplina(discId);
+  var geral = (db.etiquetas && db.etiquetas.geral) || [];
+  var porDisc = (db.etiquetas && db.etiquetas.porDisciplina) || {};
+  var doTema = d ? (porDisc[normDisc(d.nome)] || []) : [];
+  return geral.concat(doTema);
+}
+
 var db = carregar() || {};
 
 /* ================= migração ================= */
@@ -582,8 +701,24 @@ function migrarEixos(){
   db.versaoNotas = 4;
   gravar();
 }
+
+function migrarEtiquetas(){
+  if(db.versaoEtiquetas === 1) return;
+  if(Array.isArray(db.etiquetas)){
+    db.etiquetas = { geral: db.etiquetas, porDisciplina:{} };
+  }
+  if(!db.etiquetas || typeof db.etiquetas !== "object") db.etiquetas = { geral: ETIQUETAS_PADRAO.slice(), porDisciplina:{} };
+  if(!db.etiquetas.geral || !db.etiquetas.geral.length) db.etiquetas.geral = ETIQUETAS_PADRAO.slice();
+  if(!db.etiquetas.porDisciplina) db.etiquetas.porDisciplina = {};
+  Object.keys(ETIQUETAS_POR_DISCIPLINA).forEach(function(k){
+    if(!db.etiquetas.porDisciplina[k]) db.etiquetas.porDisciplina[k] = ETIQUETAS_POR_DISCIPLINA[k].slice();
+  });
+  db.versaoEtiquetas = 1;
+  gravar();
+}
 migrar();
 migrarEixos();
+migrarEtiquetas();
 
 /* ================= acesso ================= */
 var CORES = [
@@ -868,12 +1003,13 @@ var fotosTemp = [];
 function formDetalhe(aid){
   fotosTemp = [];
   var a = aluno(discAtual, aid);
+  var etq = etiquetasPara(discAtual);
   abrir(
     '<h3>Registro de participação</h3>'
     + '<p class="quem">'+esc(a.nome)+' · '+esc(rotuloCtx(discAtual))+' · '+br(dataAtual)+'</p>'
     + '<label>Etiquetas rápidas</label>'
     + '<div class="etiq" id="dEtiq">'
-    + db.etiquetas.map(function(e,i){ return '<button type="button" class="et" data-et="'+i+'">'+esc(e.rot)+'</button>'; }).join("")
+    + etq.map(function(e,i){ return '<button type="button" class="et" data-et="'+i+'">'+esc(e.rot)+'</button>'; }).join("")
     + '</div>'
     + '<label for="dTexto">O que o aluno fez</label>'
     + '<textarea id="dTexto" placeholder="Toque numa etiqueta acima ou escreva você mesmo."></textarea>'
@@ -887,7 +1023,7 @@ function formDetalhe(aid){
   );
   $("#dEtiq").addEventListener("click", function(e){
     var b = e.target.closest("button[data-et]"); if(!b) return;
-    var et = db.etiquetas[+b.dataset.et];
+    var et = etq[+b.dataset.et];
     var f = et.frases[Math.floor(Math.random()*et.frases.length)];
     var ta = $("#dTexto");
     ta.value = ta.value.trim() ? ta.value.trim()+" "+f : f;
@@ -1387,6 +1523,24 @@ function verPasta(aid){
 /* ================= ocorrência ================= */
 $("#btNovaOco").addEventListener("click", function(){ formOco(); });
 
+function marcarLacuna(ta){
+  var tem = temColchetes(ta.value);
+  ta.classList.toggle("lacuna", tem);
+  var av = document.getElementById(ta.id+"Lacuna");
+  if(av) av.hidden = !tem;
+}
+function inserirNoCampo(ta, f){
+  ta.value = ta.value.trim() ? ta.value.trim()+" "+f : f;
+  ta.focus();
+  var m = /\[[^\]]*\]/.exec(ta.value);
+  if(m) ta.setSelectionRange(m.index, m.index+m[0].length);
+  else ta.setSelectionRange(ta.value.length, ta.value.length);
+  ta.scrollTop = ta.scrollHeight;
+  marcarLacuna(ta);
+}
+function botoesEtiq(lista, dataAttr){
+  return lista.map(function(e,i){ return '<button type="button" class="et" data-'+dataAttr+'="'+i+'">'+esc(e.rot)+'</button>'; }).join("");
+}
 function formOco(){
   fotosTemp = [];
   var lista = alunosDe(discAtual);
@@ -1400,11 +1554,26 @@ function formOco(){
     + lista.map(function(a){ return '<option value="'+a.id+'">'+esc(a.nome)+'</option>'; }).join("")+'</select>'
     + '<label for="oHora">Horário</label><input type="time" id="oHora" value="'+hh+'">'
     + '<label for="oLocal">Local</label><input type="text" id="oLocal" value="Sala de aula">'
+    + '<label>Etiquetas para o fato</label>'
+    + '<div class="etiq" id="oFatoEtiq">' + botoesEtiq(ETIQUETAS_OCO_FATO, "etf") + '</div>'
     + '<label for="oFato">Fato observado</label>'
     + '<textarea id="oFato" placeholder="Recusou-se a guardar o celular após três solicitações e continuou conversando durante a explicação."></textarea>'
+    + '<p class="aviso" id="oFatoLacuna" hidden>Ainda há um trecho entre colchetes para completar antes de salvar.</p>'
     + '<div class="aviso">Descreva o que aconteceu, não o que você concluiu sobre o aluno. Registro que descreve conduta sustenta encaminhamento. Registro que rotula pessoa não sustenta.</div>'
+    + '<label style="display:flex;align-items:center;gap:8px;margin-top:16px">'
+    + '<input type="checkbox" id="oReinc" style="width:auto;margin:0"><span>É reincidência</span></label>'
+    + '<label for="oPresentes">Outras pessoas presentes</label>'
+    + '<input type="text" id="oPresentes" placeholder="Coordenador(a) Fulano, professor(a) Beltrana">'
+    + '<label style="display:flex;align-items:center;gap:8px;margin-top:16px">'
+    + '<input type="checkbox" id="oDano" style="width:auto;margin:0"><span>Houve dano material</span></label>'
+    + '<textarea id="oDanoDesc" placeholder="Descreva o que foi danificado." hidden></textarea>'
+    + '<label for="oVersao">Versão do estudante sobre o ocorrido</label>'
+    + '<textarea id="oVersao" placeholder="O que o(a) estudante disse quando foi ouvido(a)."></textarea>'
+    + '<label>Etiquetas para a providência</label>'
+    + '<div class="etiq" id="oProvEtiq">' + botoesEtiq(ETIQUETAS_OCO_PROV, "etp") + '</div>'
     + '<label for="oProv">Providência que você já tomou</label>'
     + '<textarea id="oProv" placeholder="Conversa reservada ao final da aula e mudança de lugar."></textarea>'
+    + '<p class="aviso" id="oProvLacuna" hidden>Ainda há um trecho entre colchetes para completar antes de salvar.</p>'
     + '<label for="oEnc">Encaminhamento</label><select id="oEnc">'
     + '<option>Registro interno do professor</option><option>Coordenação pedagógica</option>'
     + '<option>Direção</option><option>Comunicação à família</option><option>Conselho de classe</option></select>'
@@ -1414,15 +1583,34 @@ function formOco(){
     + '<div class="acoes"><button class="bt forte" id="oOk">Gerar documento</button>'
     + '<button class="bt" id="oNao">Cancelar</button></div>'
   );
+  $("#oFatoEtiq").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-etf]"); if(!b) return;
+    inserirNoCampo($("#oFato"), ETIQUETAS_OCO_FATO[+b.dataset.etf].texto);
+  });
+  $("#oProvEtiq").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-etp]"); if(!b) return;
+    inserirNoCampo($("#oProv"), ETIQUETAS_OCO_PROV[+b.dataset.etp].texto);
+  });
+  $("#oFato").addEventListener("input", function(){ marcarLacuna(this); });
+  $("#oProv").addEventListener("input", function(){ marcarLacuna(this); });
+  $("#oDano").addEventListener("change", function(){ $("#oDanoDesc").hidden = !this.checked; });
   $("#oFoto").addEventListener("change", function(e){ receberFotos(e.target.files, "#oPrev"); });
   $("#oNao").addEventListener("click", fechar);
   $("#oOk").addEventListener("click", function(){
     var fato = $("#oFato").value.trim(), prov = $("#oProv").value.trim();
     if(fato.length < 15){ avisar("Descreva o fato com mais detalhe."); return; }
+    if(temColchetes(fato) || temColchetes(prov)){
+      avisar("Complete os trechos entre colchetes antes de salvar.");
+      return;
+    }
     if(!prov){ avisar("Informe a providência que você já tomou. Encaminhamento sem intervenção prévia é frágil."); return; }
     var reg = { id:id(), discId:discAtual, alunoId:$("#oAluno").value, data:dataAtual,
       tipo:"ocorrencia", hora:$("#oHora").value, local:$("#oLocal").value.trim(),
-      texto:fato, providencia:prov, encaminhamento:$("#oEnc").value, fotos:fotosTemp.slice() };
+      texto:fato, providencia:prov, encaminhamento:$("#oEnc").value,
+      presentes:$("#oPresentes").value.trim(),
+      dano:$("#oDano").checked, danoDescricao:$("#oDanoDesc").value.trim(),
+      reincidencia:$("#oReinc").checked, versaoEstudante:$("#oVersao").value.trim(),
+      fotos:fotosTemp.slice() };
     db.registros.push(reg);
     if(!gravar()){ avisar("A ocorrência NÃO foi salva: memória cheia. Libere espaço na aba Aula."); return; }
     fechar(); pintarOco(); pintarAula(); verOco(reg.id);
@@ -1447,16 +1635,32 @@ function pintarOco(){
   };
 }
 
+function pontuar(s){ s = String(s||""); return s + (/[.!?]$/.test(s) ? "" : "."); }
+
 function textoOco(r){
   var t = turmaDe(r.discId), d = disciplina(r.discId);
   var a = t ? t.alunos.filter(function(x){ return x.id===r.alunoId; })[0] : null;
-  return "Aos "+br(r.data)+", às "+(r.hora||"")+", em "+(r.local||"sala de aula")
+  var paragrafos = [];
+
+  paragrafos.push("Aos "+br(r.data)+", às "+(r.hora||"")+", em "+(r.local||"sala de aula")
     + ", durante a aula de "+((d&&d.nome)||"")+" da turma "+((t&&t.nome)||"")
-    + ", o(a) estudante "+((a&&a.nome)||"")+" apresentou a seguinte conduta: "+r.texto
-    + (/[.!?]$/.test(r.texto)?"":".")
-    + " Como providência imediata, o professor adotou: "+r.providencia
-    + (/[.!?]$/.test(r.providencia)?"":".")
-    + " O presente registro é encaminhado a: "+r.encaminhamento+".";
+    + ", foi registrada ocorrência envolvendo o(a) estudante "+((a&&a.nome)||"")+".");
+
+  var fato = pontuar(r.texto);
+  if(r.reincidencia) fato += " Trata-se de reincidência.";
+  paragrafos.push(fato);
+
+  var contexto = [];
+  if(r.presentes) contexto.push("Estavam presentes também: "+pontuar(r.presentes));
+  if(r.dano) contexto.push(r.danoDescricao ? "Houve dano material: "+pontuar(r.danoDescricao) : "Houve dano material.");
+  if(contexto.length) paragrafos.push(contexto.join(" "));
+
+  if(r.versaoEstudante) paragrafos.push("Ouvido(a), o(a) estudante relatou: "+pontuar(r.versaoEstudante));
+
+  paragrafos.push("Como providência imediata, o professor adotou: "+pontuar(r.providencia));
+  paragrafos.push("O presente registro é encaminhado a: "+r.encaminhamento+".");
+
+  return paragrafos.join("\n\n");
 }
 
 function verOco(rid){
@@ -1545,6 +1749,7 @@ function imprimirOco(r, texto){
     + '<p class="campo"><b>Componente curricular:</b> '+esc(d?d.nome:"")+'</p>'
     + '<p class="campo"><b>Data e horário:</b> '+br(r.data)+', '+esc(r.hora||"")+'</p>'
     + '<p class="campo"><b>Local:</b> '+esc(r.local||"")+'</p>'
+    + (r.reincidencia?'<p class="campo"><b>Reincidência:</b> Sim</p>':'')
     + '<div class="corpo">'+esc(texto).replace(/\n/g,"<br>")+'</div>'
     + ((r.fotos&&r.fotos.length)?'<p class="campo"><b>Anexos:</b></p>'+r.fotos.map(function(s){return '<img src="'+s+'" alt="">';}).join(""):'')
     + '<div class="assina"><div>'+esc(db.cfg.prof||"Professor")+'</div><div>Coordenação</div><div>Responsável pelo estudante</div></div>'
@@ -1889,8 +2094,11 @@ function pintarDados(){
     var b = e.target.closest("button[data-turma]"); if(b) formTurma(b.dataset.turma);
   };
 
-  var nf = db.etiquetas.reduce(function(s,e){ return s+e.frases.length; },0);
-  $("#qtdEtiq").textContent = db.etiquetas.length+" etiquetas, "+nf+" frases prontas.";
+  var contarFrases = function(lista){ return lista.reduce(function(s,e){ return s+e.frases.length; },0); };
+  var chavesDisc = Object.keys(db.etiquetas.porDisciplina);
+  var totalEtiq = db.etiquetas.geral.length + chavesDisc.reduce(function(s,k){ return s+db.etiquetas.porDisciplina[k].length; },0);
+  var totalFrases = contarFrases(db.etiquetas.geral) + chavesDisc.reduce(function(s,k){ return s+contarFrases(db.etiquetas.porDisciplina[k]); },0);
+  $("#qtdEtiq").textContent = totalEtiq+" etiquetas em "+(1+chavesDisc.length)+" conjuntos, "+totalFrases+" frases prontas.";
 
   var bytes = tamanhoDb();
   var pc = Math.min(100, Math.round(bytes/LIMITE*100));
@@ -2113,36 +2321,59 @@ function formTurma(tid){
   });
 }
 
-$("#btEtiq").addEventListener("click", function(){
-  var texto = db.etiquetas.map(function(e){ return e.rot+" :: "+e.frases.join(" | "); }).join("\n\n");
+function conjuntoEtiq(chave){
+  if(chave === "geral") return db.etiquetas.geral;
+  if(!db.etiquetas.porDisciplina[chave]) db.etiquetas.porDisciplina[chave] = [];
+  return db.etiquetas.porDisciplina[chave];
+}
+function gravarConjuntoEtiq(chave, lista){
+  if(chave === "geral") db.etiquetas.geral = lista;
+  else db.etiquetas.porDisciplina[chave] = lista;
+}
+function padraoConjuntoEtiq(chave){
+  return chave === "geral" ? ETIQUETAS_PADRAO.slice() : (ETIQUETAS_POR_DISCIPLINA[chave] || []).slice();
+}
+function abrirEditorEtiq(chave){
+  var texto = conjuntoEtiq(chave).map(function(e){ return e.rot+" :: "+e.frases.join(" | "); }).join("\n\n");
   abrir(
     '<h3>Frases das etiquetas</h3>'
+    + '<label for="etConjunto">Conjunto</label>'
+    + '<select id="etConjunto">' + DISCIPLINAS_ETIQ.map(function(x){
+        return '<option value="'+x.chave+'"'+(x.chave===chave?" selected":"")+'>'+esc(x.nome)+'</option>';
+      }).join("") + '</select>'
+    + '<p class="nota">O conjunto geral aparece somado ao da disciplina em toda tela de registro.</p>'
     + '<p class="quem">Uma etiqueta por bloco. O rótulo vem antes de dois-pontos duplos e as variações são separadas por barra vertical.</p>'
     + '<textarea id="etTxt" style="min-height:300px;font-size:13.5px">'+esc(texto)+'</textarea>'
     + '<p class="nota">Escreva no mesmo tom que você usaria num parecer. O texto vai direto para a pasta impressa.</p>'
     + '<div class="acoes"><button class="bt forte" id="etOk">Salvar frases</button>'
-    + '<button class="bt" id="etPadrao">Restaurar padrão</button>'
+    + '<button class="bt" id="etPadrao">Restaurar padrão deste conjunto</button>'
     + '<button class="bt" id="etNao">Cancelar</button></div>'
   );
+  $("#etConjunto").addEventListener("change", function(){ abrirEditorEtiq(this.value); });
   $("#etNao").addEventListener("click", fechar);
   $("#etPadrao").addEventListener("click", function(){
-    perguntar("Voltar às frases originais? Suas alterações serão perdidas.", function(){
-      db.etiquetas = ETIQUETAS_PADRAO; gravar(); fechar(); pintarDados();
+    perguntar("Voltar às frases originais deste conjunto? Suas alterações serão perdidas.", function(){
+      gravarConjuntoEtiq(chave, padraoConjuntoEtiq(chave)); gravar(); fechar(); pintarDados();
     }, "Restaurar");
   });
   $("#etOk").addEventListener("click", function(){
+    var bruto = $("#etTxt").value;
     var novas = [];
-    $("#etTxt").value.split("\n").forEach(function(l){
+    bruto.split("\n").forEach(function(l){
       l = l.trim(); if(!l || l.indexOf("::") < 0) return;
       var p = l.split("::");
       var rot = p[0].trim();
       var frases = p.slice(1).join("::").split("|").map(function(s){ return s.trim(); }).filter(Boolean);
       if(rot && frases.length) novas.push({rot:rot, frases:frases});
     });
-    if(!novas.length){ avisar("Nenhuma etiqueta reconhecida. Confira o formato Rótulo :: frase | frase."); return; }
-    db.etiquetas = novas; gravar(); fechar(); pintarDados();
+    if(!novas.length && (chave === "geral" || bruto.trim())){
+      avisar("Nenhuma etiqueta reconhecida. Confira o formato Rótulo :: frase | frase.");
+      return;
+    }
+    gravarConjuntoEtiq(chave, novas); gravar(); fechar(); pintarDados();
   });
-});
+}
+$("#btEtiq").addEventListener("click", function(){ abrirEditorEtiq("geral"); });
 
 /* ================= backup ================= */
 var adiado = false;
@@ -2259,7 +2490,7 @@ $("#btColar").addEventListener("click", function(){
   $("#colSub").addEventListener("click", function(){
     var novo = lido(); if(!novo) return;
     perguntar("Substituir os dados atuais por este backup?", function(){
-      db = novo; migrar(); migrarEixos();
+      db = novo; migrar(); migrarEixos(); migrarEtiquetas();
       discAtual = db.disciplinas.length ? db.disciplinas[0].id : null;
       gravar(); fechar();
       pintarTopo(); pintarAula(); pintarDados(); pintarOco(); pintarNotas();
@@ -2295,7 +2526,7 @@ $("#arqImport").addEventListener("change", function(e){
       var novo = JSON.parse(ev.target.result);
       if(!novo.turmas || !novo.registros) throw 0;
       perguntar("Substituir os dados atuais pelo backup?", function(){
-        db = novo; migrar(); migrarEixos();
+        db = novo; migrar(); migrarEixos(); migrarEtiquetas();
         discAtual = db.disciplinas.length ? db.disciplinas[0].id : null;
         pintarTopo(); pintarAula(); pintarDados(); pintarOco(); pintarNotas();
         avisar("Backup carregado.");

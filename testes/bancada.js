@@ -77,7 +77,7 @@ let app = novoApp(null);
 ok("1.1 abre sem dados sem quebrar", !app.w.__erro);
 ok("1.2 estrutura inicial criada", app.db().versao === 3 && Array.isArray(app.db().escolas));
 ok("1.3 estado vazio convida a agir", /Comece pela sua primeira turma/.test(app.q("#grade").textContent) && !!app.q("#convite1"));
-ok("1.4 dez etiquetas padrao", app.db().etiquetas.length === 10);
+ok("1.4 dez etiquetas padrao no conjunto geral", app.db().etiquetas.geral.length === 10);
 ok("1.5 composicao 4/4/2", app.db().aval.e1.valor===4 && app.db().aval.e2.valor===4 && app.db().aval.e3.valor===2);
 
 /* ============ 2. cadastro escola / turma / disciplina ============ */
@@ -161,7 +161,7 @@ ok("6.6 volta a somar participacao", app.db().registros.filter(r=>r.discId===dAr
 
 /* ============ 7. etiquetas e descricao ============ */
 app.q('#grade button[data-det="'+alunoIds[0]+'"]').click();
-ok("7.1 painel abre com etiquetas", app.todos("#dEtiq .et").length===10);
+ok("7.1 painel abre com etiquetas", app.todos("#dEtiq .et").length===13);
 app.q('#dEtiq button[data-et="3"]').click();
 const txt1 = app.q("#dTexto").value;
 ok("7.2 etiqueta escreve frase longa", txt1.length > 60, txt1.length+" chars");
@@ -173,7 +173,7 @@ const comTexto = app.db().registros.filter(r=>r.texto && r.texto.length>60);
 ok("7.5 registro com texto salvo", comTexto.length===1);
 
 // variacao das frases
-const et = app.db().etiquetas[3];
+const et = app.db().etiquetas.geral[3];
 ok("7.6 etiqueta tem 3 variacoes", et.frases.length===3);
 
 /* ============ 8. busca ============ */
@@ -315,23 +315,43 @@ ok("17.1 disciplina removida", !app.db().disciplinas.some(x=>x.id===dJogos));
 ok("17.2 registros dela apagados", app.db().registros.filter(r=>r.discId===dJogos).length===0);
 ok("17.3 registros de Arte intactos", app.db().registros.filter(r=>r.discId===dArte).length>0);
 
-/* ============ 18. etiquetas editaveis ============ */
+/* ============ 18. etiquetas editaveis (conjunto geral) ============ */
 app.clique("#btEtiq");
+ok("18.0 abre no conjunto geral", app.q("#etConjunto").value==="geral");
 app.escreve("#etTxt","Sociologia debate :: Defendeu posição no debate com argumento fundamentado. | Retomou a fala de um colega para contrapor com dado da aula.\nProjeto de Vida :: Relacionou a atividade ao seu próprio projeto de futuro.");
 app.clique("#etOk");
-ok("18.1 etiquetas substituidas", app.db().etiquetas.length===2);
-ok("18.2 variacoes lidas", app.db().etiquetas[0].frases.length===2);
-ok("18.3 contador atualizado", /2 etiquetas, 3 frases/.test(app.q("#qtdEtiq").textContent));
+ok("18.1 etiquetas do geral substituidas", app.db().etiquetas.geral.length===2);
+ok("18.2 variacoes lidas", app.db().etiquetas.geral[0].frases.length===2);
+const totalEtiq18 = app.db().etiquetas.geral.length
+  + Object.keys(app.db().etiquetas.porDisciplina).reduce((s,k)=>s+app.db().etiquetas.porDisciplina[k].length,0);
+const totalConj18 = 1 + Object.keys(app.db().etiquetas.porDisciplina).length;
+ok("18.3 contador atualizado", app.q("#qtdEtiq").textContent.indexOf(totalEtiq18+" etiquetas em "+totalConj18+" conjuntos")===0,
+   app.q("#qtdEtiq").textContent);
 app.clique("#btEtiq");
 app.escreve("#etTxt","texto sem formato nenhum");
 app.clique("#etOk");
-ok("18.4 recusa formato invalido", app.db().etiquetas.length===2);
+ok("18.4 recusa formato invalido", app.db().etiquetas.geral.length===2);
+app.clique("#etNao");
+
+/* ============ 18b. etiquetas por disciplina ============ */
+app.clique("#btEtiq");
+app.escreve("#etConjunto","arte");
+ok("18.5 troca de conjunto carrega frases da disciplina", /Explorou técnica nova/.test(app.q("#etTxt").value));
+app.escreve("#etTxt","Testou sozinho :: Testou uma solução própria sem ajuda.");
+app.clique("#etOk");
+ok("18.6 conjunto de arte salvo separado do geral", app.db().etiquetas.porDisciplina["arte"].length===1
+  && app.db().etiquetas.geral.length===2);
+app.clique("#btEtiq");
+app.escreve("#etConjunto","arte");
+app.clique("#etPadrao");
+ok("18.7 restaura padrao so do conjunto escolhido", app.db().etiquetas.porDisciplina["arte"].length===3
+  && app.db().etiquetas.geral.length===2);
 app.clique("#etNao");
 
 /* ============ 19. importar backup ============ */
 app.clique("#btEtiq");
 app.clique("#etPadrao");
-ok("19.1 restaura etiquetas padrao", app.db().etiquetas.length===10);
+ok("19.1 restaura etiquetas padrao do geral", app.db().etiquetas.geral.length===10);
 
 /* ============ 20. persistencia entre sessoes ============ */
 const salvo = JSON.parse(app.loja["caderneta"]);

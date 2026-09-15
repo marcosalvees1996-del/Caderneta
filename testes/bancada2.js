@@ -203,7 +203,7 @@ app6.aba("dados");
 app6.clique("#btLimpar");
 ok("I.1 tudo apagado", app6.db().turmas.length===0 && app6.db().registros.length===0);
 ok("I.2 preserva nome do professor", typeof app6.db().cfg.prof === "string");
-ok("I.3 preserva etiquetas", app6.db().etiquetas.length===10);
+ok("I.3 preserva etiquetas", app6.db().etiquetas.geral.length===10);
 ok("I.4 telas nao quebram", !!app6.q("#grade") && !!app6.q("#listaNotas"));
 
 /* ===== J. armazenamento cheio ===== */
