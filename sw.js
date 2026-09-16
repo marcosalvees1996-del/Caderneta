@@ -2,7 +2,7 @@
    guarda o essencial para abrir offline; tenta a rede primeiro,
    cai para o cache quando nao ha sinal. Nao toca em localStorage:
    isso nao existe neste escopo. */
-var CACHE = "caderneta-v1";
+var CACHE = "caderneta-v2";
 var ARQUIVOS = [
   "./",
   "./index.html",
@@ -39,7 +39,7 @@ self.addEventListener("activate", function(ev){
 self.addEventListener("fetch", function(ev){
   if(ev.request.method !== "GET") return;
   ev.respondWith(
-    fetch(ev.request).then(function(resposta){
+    fetch(ev.request, { cache: "no-store" }).then(function(resposta){
       var copia = resposta.clone();
       caches.open(CACHE).then(function(cache){ cache.put(ev.request, copia); });
       return resposta;
