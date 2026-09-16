@@ -396,6 +396,11 @@ textarea{min-height:88px;resize:vertical}
   <input type="text" id="cfgProf">
   <div class="acoes"><button class="bt" id="btSalvarCfg">Salvar</button></div>
 
+  <label style="display:flex;align-items:center;gap:8px;margin-top:14px">
+    <input type="checkbox" id="cfgVibrar" style="width:auto;margin:0">
+    <span>Vibrar ao registrar participação, falta e desfazer</span>
+  </label>
+
   <h2 style="margin-top:20px">Escolas</h2>
   <div id="listaEscolas"></div>
   <div class="acoes"><button class="bt" id="btNovaEscola">Cadastrar escola</button></div>
@@ -657,6 +662,7 @@ var db = carregar() || {};
 /* ================= migração ================= */
 function migrar(){
   if(!db.cfg) db.cfg = { prof:"Prof. Marcos Antônio Alves de Moraes" };
+  if(db.cfg.vibrar === undefined) db.cfg.vibrar = true;
   if(!db.notas) db.notas = {};
   if(!db.periodos) db.periodos = {};
   if(!db.etiquetas) db.etiquetas = ETIQUETAS_PADRAO;
@@ -1074,6 +1080,11 @@ function pintarAula(){
 $("#buscaAula").addEventListener("input", function(){ filtroAula = this.value; pintarAula(); });
 $("#btFalta").addEventListener("click", function(){ modoFalta = !modoFalta; pintarAula(); });
 
+function vibrar(padrao){
+  if(!db.cfg.vibrar) return;
+  try{ if(navigator.vibrate) navigator.vibrate(padrao); }catch(e){}
+}
+
 $("#grade").addEventListener("click", function(e){
   var b = e.target.closest("button"); if(!b) return;
   if(b.dataset.add){
@@ -1084,10 +1095,11 @@ $("#grade").addEventListener("click", function(e){
         if(r.discId===discAtual && r.data===dataAtual && r.alunoId===aid && r.tipo==="falta") achou = i;
       });
       if(achou >= 0) db.registros.splice(achou,1);
-      else db.registros.push({ id:id(), discId:discAtual, alunoId:aid, data:dataAtual, tipo:"falta" });
+      else{ db.registros.push({ id:id(), discId:discAtual, alunoId:aid, data:dataAtual, tipo:"falta" }); vibrar([12,40,12]); }
     }else{
       db.registros.push({ id:id(), discId:discAtual, alunoId:aid, data:dataAtual,
                           tipo:"participacao", texto:"", fotos:[] });
+      vibrar(12);
     }
     gravar(); pintarAula();
   }
@@ -1098,7 +1110,7 @@ $("#btDesfazer").addEventListener("click", function(){
   for(var i=db.registros.length-1;i>=0;i--){
     var r = db.registros[i];
     if(r.discId===discAtual && r.data===dataAtual && r.tipo==="participacao"){
-      db.registros.splice(i,1); gravar(); pintarAula(); return;
+      db.registros.splice(i,1); gravar(); pintarAula(); vibrar(30); return;
     }
   }
   avisar("Não há registro de participação para desfazer neste dia.");
@@ -2171,6 +2183,7 @@ function formJuntar(novo){
 /* ================= dados ================= */
 function pintarDados(){
   $("#cfgProf").value = db.cfg.prof||"";
+  $("#cfgVibrar").checked = !!db.cfg.vibrar;
 
   $("#listaEscolas").innerHTML = db.escolas.length ? db.escolas.map(function(e){
     var nt = db.turmas.filter(function(t){ return t.escolaId===e.id; }).length;
@@ -2225,6 +2238,10 @@ $("#btSalvarCfg").addEventListener("click", function(){
   gravar(); pintarDados();
   this.textContent = "Salvo";
   var b = this; setTimeout(function(){ b.textContent = "Salvar"; }, 1500);
+});
+$("#cfgVibrar").addEventListener("change", function(){
+  db.cfg.vibrar = this.checked;
+  if(!gravar()) avisar("Não consegui salvar a preferência: memória cheia.");
 });
 
 $("#btNovaEscola").addEventListener("click", function(){ formEscola(null); });
