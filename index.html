@@ -1696,13 +1696,18 @@ function marcarLacuna(ta){
   var av = document.getElementById(ta.id+"Lacuna");
   if(av) av.hidden = !tem;
 }
+function ajustarAltura(ta){
+  ta.style.height = "auto";
+  ta.style.height = ta.scrollHeight + "px";
+}
 function inserirNoCampo(ta, f){
   ta.value = ta.value.trim() ? ta.value.trim()+" "+f : f;
   ta.focus();
+  if(ta.id === "oFato") ajustarAltura(ta);
   var m = /\[[^\]]*\]/.exec(ta.value);
   if(m) ta.setSelectionRange(m.index, m.index+m[0].length);
   else ta.setSelectionRange(ta.value.length, ta.value.length);
-  ta.scrollTop = ta.scrollHeight;
+  ta.scrollTop = 0;
   marcarLacuna(ta);
 }
 function botoesEtiq(lista, dataAttr){
@@ -1760,7 +1765,7 @@ function formOco(){
     var b = e.target.closest("button[data-etp]"); if(!b) return;
     inserirNoCampo($("#oProv"), ETIQUETAS_OCO_PROV[+b.dataset.etp].texto);
   });
-  $("#oFato").addEventListener("input", function(){ marcarLacuna(this); });
+  $("#oFato").addEventListener("input", function(){ marcarLacuna(this); ajustarAltura(this); });
   $("#oProv").addEventListener("input", function(){ marcarLacuna(this); });
   $("#oDano").addEventListener("change", function(){ $("#oDanoDesc").hidden = !this.checked; });
   $("#oFoto").addEventListener("change", function(e){ receberFotos(e.target.files, "#oPrev"); });

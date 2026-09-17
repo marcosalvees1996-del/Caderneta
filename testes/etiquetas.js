@@ -148,6 +148,17 @@ ok("C.2d etiqueta sem colchetes nao acusa lacuna", !c.q("#oFato").classList.cont
   && c.q("#oFatoLacuna").hidden===true);
 c.escreve("#oFato","");
 
+/* nenhuma etiqueta de fato observado insere frase truncada ou reescrita */
+c.db().etiquetas.ocoFato.forEach(function(et, idx){
+  for(let tentativa=0; tentativa<2; tentativa++){
+    c.q('#oFatoEtiq button[data-etf="'+idx+'"]').click();
+    const valor = c.q("#oFato").value.trim();
+    ok("C.2e '"+et.rot+"' insere a frase completa e identica a cadastrada",
+      et.frases.indexOf(valor) >= 0, JSON.stringify({valor:valor, esperadas:et.frases}));
+    c.escreve("#oFato","");
+  }
+});
+
 c.q('#oFatoEtiq button[data-etf="0"]').click();
 const valorFato = c.q("#oFato").value;
 ok("C.3 clique insere frase com colchetes", /\[[^\]]+\]/.test(valorFato), valorFato);
@@ -241,6 +252,26 @@ g.escreve("#etConjunto","ocoFato");
 g.clique("#etPadrao");
 ok("E.4 restaurar padrao devolve as dez etiquetas originais", g.db().etiquetas.ocoFato.length===10
   && g.db().etiquetas.ocoFato.some(e=>e.rot==="Não apresentou atividade de casa"));
+
+/* ===== F. frase longa de etiqueta chega inteira ao texto e ao impresso ===== */
+let h = novoApp(null);
+const idsH = montarTurma(h);
+h.aba("oco"); h.clique("#btNovaOco");
+const idxNaoRealizou = h.db().etiquetas.ocoFato.findIndex(e=>e.rot==="Não realizou a atividade");
+const etNaoRealizou = h.db().etiquetas.ocoFato[idxNaoRealizou];
+const fraseLonga = etNaoRealizou.frases[0];
+h.q('#oFatoEtiq button[data-etf="'+idxNaoRealizou+'"]').click();
+ok("F.1 campo recebe a frase completa sem cortar",
+  etNaoRealizou.frases.indexOf(h.q("#oFato").value.trim())>=0, h.q("#oFato").value);
+h.escreve("#oFato", fraseLonga);
+h.escreve("#oProv","Conversa reservada ao final da aula.");
+h.clique("#oOk");
+const regLongo = h.db().registros.find(r=>r.tipo==="ocorrencia");
+ok("F.2 registro salvo com a frase completa", regLongo.texto===fraseLonga, regLongo.texto);
+const textoLongo = h.w.eval("textoOco("+JSON.stringify(regLongo)+")");
+ok("F.3 texto gerado contem a frase inteira", textoLongo.indexOf(fraseLonga)>=0);
+h.q("#oImp").click();
+ok("F.4 documento impresso contem a frase inteira", h.q("#doc").innerHTML.indexOf(fraseLonga)>=0);
 
 console.log("Passaram: "+passes);
 console.log("Falharam: "+falhas.length);
