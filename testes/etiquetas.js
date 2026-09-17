@@ -120,15 +120,33 @@ ok("B.1 geral herda a lista antiga sem perder nada", m.db().etiquetas.geral.leng
 ok("B.2 bancos por disciplina aparecem depois da migracao",
   Object.keys(m.db().etiquetas.porDisciplina).length===7);
 ok("B.3 banco de arte vem com frases padrao", m.db().etiquetas.porDisciplina["arte"].length===3);
-ok("B.4 migracao e idempotente", m.w.eval("db.versaoEtiquetas")===1);
+ok("B.4 migracao e idempotente", m.w.eval("db.versaoEtiquetas")===2);
+ok("B.5 fato observado ganha o banco padrao sem mexer no geral",
+  m.db().etiquetas.ocoFato.length===10 && m.db().etiquetas.geral[0].rot==="Frase própria do professor");
 
 /* ===== C. etiquetas de ocorrencia com lacunas ===== */
 let c = novoApp(null);
 const idsC = montarTurma(c);
 c.aba("oco");
 c.clique("#btNovaOco");
-ok("C.1 etiquetas de fato aparecem", c.todos("#oFatoEtiq .et").length === 6);
+ok("C.1 etiquetas de fato aparecem", c.todos("#oFatoEtiq .et").length === 10);
 ok("C.2 etiquetas de providencia aparecem", c.todos("#oProvEtiq .et").length === 4);
+
+/* etiqueta nova sem colchetes, com tres variacoes, nao acusa lacuna */
+const rotulosFato = c.todos("#oFatoEtiq .et").map(b=>b.textContent);
+ok("C.2b traz a etiqueta nova de respeito ao professor", rotulosFato.includes("Respeito ao professor"));
+const idxRespeito = rotulosFato.indexOf("Respeito ao professor");
+const vistos = new Set();
+for(let i=0;i<12;i++){
+  c.q('#oFatoEtiq button[data-etf="'+idxRespeito+'"]').click();
+  vistos.add(c.q("#oFato").value.trim());
+  c.escreve("#oFato","");
+}
+ok("C.2c sorteia entre as tres variacoes cadastradas", vistos.size>1, [...vistos].join(" || "));
+c.q('#oFatoEtiq button[data-etf="'+idxRespeito+'"]').click();
+ok("C.2d etiqueta sem colchetes nao acusa lacuna", !c.q("#oFato").classList.contains("lacuna")
+  && c.q("#oFatoLacuna").hidden===true);
+c.escreve("#oFato","");
 
 c.q('#oFatoEtiq button[data-etf="0"]').click();
 const valorFato = c.q("#oFato").value;
@@ -200,6 +218,29 @@ ok("D.11 sem presentes nem dano nem versao, texto nao menciona nada disso",
   && !/estudante relatou/.test(textoEnxuto) && !/reincidência/.test(textoEnxuto));
 e.q("#oImp").click();
 ok("D.12 documento impresso nao mostra linha de reincidencia", !/Reincidência:/.test(e.q("#doc").innerHTML));
+
+/* ===== E. editor de frases atende o conjunto de fato observado ===== */
+let g = novoApp(null);
+montarTurma(g);
+g.aba("dados");
+g.clique("#btEtiq");
+g.escreve("#etConjunto","ocoFato");
+ok("E.1 troca para o conjunto de ocorrencia carrega as frases dele",
+  /Respeito ao professor/.test(g.q("#etTxt").value) && /Recusa a orientação/.test(g.q("#etTxt").value));
+g.escreve("#etTxt","Chegou atrasado :: Chegou atrasado à aula sem justificativa.");
+g.clique("#etOk");
+ok("E.2 conjunto de fato observado salvo isolado do geral",
+  g.db().etiquetas.ocoFato.length===1 && g.db().etiquetas.ocoFato[0].rot==="Chegou atrasado"
+  && g.db().etiquetas.geral.length===10);
+g.aba("oco"); g.clique("#btNovaOco");
+ok("E.3 formulario de ocorrencia reflete a edicao", g.todos("#oFatoEtiq .et").length===1
+  && g.q("#oFatoEtiq .et").textContent==="Chegou atrasado");
+g.q("#oNao").click();
+g.aba("dados"); g.clique("#btEtiq");
+g.escreve("#etConjunto","ocoFato");
+g.clique("#etPadrao");
+ok("E.4 restaurar padrao devolve as dez etiquetas originais", g.db().etiquetas.ocoFato.length===10
+  && g.db().etiquetas.ocoFato.some(e=>e.rot==="Não apresentou atividade de casa"));
 
 console.log("Passaram: "+passes);
 console.log("Falharam: "+falhas.length);

@@ -322,9 +322,9 @@ app.escreve("#etTxt","Sociologia debate :: Defendeu posição no debate com argu
 app.clique("#etOk");
 ok("18.1 etiquetas do geral substituidas", app.db().etiquetas.geral.length===2);
 ok("18.2 variacoes lidas", app.db().etiquetas.geral[0].frases.length===2);
-const totalEtiq18 = app.db().etiquetas.geral.length
+const totalEtiq18 = app.db().etiquetas.geral.length + app.db().etiquetas.ocoFato.length
   + Object.keys(app.db().etiquetas.porDisciplina).reduce((s,k)=>s+app.db().etiquetas.porDisciplina[k].length,0);
-const totalConj18 = 1 + Object.keys(app.db().etiquetas.porDisciplina).length;
+const totalConj18 = 2 + Object.keys(app.db().etiquetas.porDisciplina).length;
 ok("18.3 contador atualizado", app.q("#qtdEtiq").textContent.indexOf(totalEtiq18+" etiquetas em "+totalConj18+" conjuntos")===0,
    app.q("#qtdEtiq").textContent);
 app.clique("#btEtiq");

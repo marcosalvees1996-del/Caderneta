@@ -578,7 +578,8 @@ var DISCIPLINAS_ETIQ = [
   {chave:"sociologia", nome:"Sociologia"},
   {chave:"filosofia", nome:"Filosofia"},
   {chave:"projeto de vida", nome:"Projeto de Vida"},
-  {chave:"matematica no cotidiano", nome:"Matemática no Cotidiano"}
+  {chave:"matematica no cotidiano", nome:"Matemática no Cotidiano"},
+  {chave:"ocoFato", nome:"Ocorrência: fato observado"}
 ];
 
 var ETIQUETAS_POR_DISCIPLINA = {
@@ -661,13 +662,29 @@ var ETIQUETAS_POR_DISCIPLINA = {
   ]
 };
 
-var ETIQUETAS_OCO_FATO = [
-  {rot:"Recusa a orientação", texto:"Recusou-se a [o que] após [quantas] solicitações."},
-  {rot:"Uso de celular", texto:"Usou o celular sem autorização durante [qual momento da aula], mesmo após pedido para guardar."},
-  {rot:"Conversa paralela", texto:"Manteve conversa paralela durante [qual momento da aula], atrapalhando [quem]."},
-  {rot:"Dano a material", texto:"Danificou [qual material] durante [qual atividade]."},
-  {rot:"Fala inadequada", texto:"Dirigiu-se a [quem] com [que tipo de fala], durante [qual momento]."},
-  {rot:"Saída sem autorização", texto:"Saiu de [onde] sem autorização durante [qual momento da aula]."}
+var ETIQUETAS_OCO_FATO_PADRAO = [
+  {rot:"Recusa a orientação", frases:["Recusou-se a [o que] após [quantas] solicitações."]},
+  {rot:"Uso de celular", frases:["Usou o celular sem autorização durante [qual momento da aula], mesmo após pedido para guardar."]},
+  {rot:"Conversa paralela", frases:["Manteve conversa paralela durante [qual momento da aula], atrapalhando [quem]."]},
+  {rot:"Dano a material", frases:["Danificou [qual material] durante [qual atividade]."]},
+  {rot:"Fala inadequada", frases:["Dirigiu-se a [quem] com [que tipo de fala], durante [qual momento]."]},
+  {rot:"Saída sem autorização", frases:["Saiu de [onde] sem autorização durante [qual momento da aula]."]},
+  {rot:"Respeito ao professor", frases:[
+    "Demonstrou comportamento desrespeitoso com o professor, utilizando linguagem inadequada ou desconsiderando orientações durante a aula.",
+    "Apresentou dificuldade em respeitar as orientações e a autoridade do professor durante a atividade.",
+    "Desrespeitou o professor durante a aula, sendo necessário realizar intervenção para manter o bom andamento da atividade."]},
+  {rot:"Não realizou a atividade", frases:[
+    "Não realizou a atividade proposta em sala de aula, mesmo após as orientações do professor.",
+    "Não iniciou ou concluiu a atividade proposta, necessitando de acompanhamento e incentivo para participar.",
+    "Recusou-se a realizar a atividade proposta, mesmo após as orientações e intervenções do professor."]},
+  {rot:"Recusou entrar em sala de aula", frases:[
+    "Recusou-se a entrar em sala de aula, mesmo após orientação do professor.",
+    "Permaneceu fora da sala de aula após ser solicitado a retornar, comprometendo sua participação na atividade.",
+    "Demonstrou resistência em entrar na sala de aula, sendo necessária intervenção do professor."]},
+  {rot:"Não apresentou atividade de casa", frases:[
+    "Não apresentou a atividade de casa solicitada pelo professor.",
+    "Não entregou a atividade de casa na data estabelecida, mesmo após orientação.",
+    "Compareceu à aula sem a atividade de casa solicitada, sendo orientado sobre a importância do cumprimento das atividades."]}
 ];
 var ETIQUETAS_OCO_PROV = [
   {rot:"Conversa reservada", texto:"Conversa reservada com o(a) estudante ao final da aula, orientando sobre [o que]."},
@@ -764,7 +781,7 @@ function migrarEixos(){
 }
 
 function migrarEtiquetas(){
-  if(db.versaoEtiquetas === 1) return;
+  if(db.versaoEtiquetas === 2) return;
   if(Array.isArray(db.etiquetas)){
     db.etiquetas = { geral: db.etiquetas, porDisciplina:{} };
   }
@@ -774,7 +791,8 @@ function migrarEtiquetas(){
   Object.keys(ETIQUETAS_POR_DISCIPLINA).forEach(function(k){
     if(!db.etiquetas.porDisciplina[k]) db.etiquetas.porDisciplina[k] = ETIQUETAS_POR_DISCIPLINA[k].slice();
   });
-  db.versaoEtiquetas = 1;
+  if(!db.etiquetas.ocoFato) db.etiquetas.ocoFato = ETIQUETAS_OCO_FATO_PADRAO.slice();
+  db.versaoEtiquetas = 2;
   gravar();
 }
 migrar();
@@ -1704,7 +1722,7 @@ function formOco(){
     + '<label for="oHora">Horário</label><input type="time" id="oHora" value="'+hh+'">'
     + '<label for="oLocal">Local</label><input type="text" id="oLocal" value="Sala de aula">'
     + '<label>Etiquetas para o fato</label>'
-    + '<div class="etiq" id="oFatoEtiq">' + botoesEtiq(ETIQUETAS_OCO_FATO, "etf") + '</div>'
+    + '<div class="etiq" id="oFatoEtiq">' + botoesEtiq(db.etiquetas.ocoFato, "etf") + '</div>'
     + '<label for="oFato">Fato observado</label>'
     + '<textarea id="oFato" placeholder="Recusou-se a guardar o celular após três solicitações e continuou conversando durante a explicação."></textarea>'
     + '<p class="aviso" id="oFatoLacuna" hidden>Ainda há um trecho entre colchetes para completar antes de salvar.</p>'
@@ -1734,7 +1752,9 @@ function formOco(){
   );
   $("#oFatoEtiq").addEventListener("click", function(e){
     var b = e.target.closest("button[data-etf]"); if(!b) return;
-    inserirNoCampo($("#oFato"), ETIQUETAS_OCO_FATO[+b.dataset.etf].texto);
+    var et = db.etiquetas.ocoFato[+b.dataset.etf];
+    var f = et.frases[Math.floor(Math.random()*et.frases.length)];
+    inserirNoCampo($("#oFato"), f);
   });
   $("#oProvEtiq").addEventListener("click", function(e){
     var b = e.target.closest("button[data-etp]"); if(!b) return;
@@ -2246,9 +2266,11 @@ function pintarDados(){
 
   var contarFrases = function(lista){ return lista.reduce(function(s,e){ return s+e.frases.length; },0); };
   var chavesDisc = Object.keys(db.etiquetas.porDisciplina);
-  var totalEtiq = db.etiquetas.geral.length + chavesDisc.reduce(function(s,k){ return s+db.etiquetas.porDisciplina[k].length; },0);
-  var totalFrases = contarFrases(db.etiquetas.geral) + chavesDisc.reduce(function(s,k){ return s+contarFrases(db.etiquetas.porDisciplina[k]); },0);
-  $("#qtdEtiq").textContent = totalEtiq+" etiquetas em "+(1+chavesDisc.length)+" conjuntos, "+totalFrases+" frases prontas.";
+  var totalEtiq = db.etiquetas.geral.length + db.etiquetas.ocoFato.length
+    + chavesDisc.reduce(function(s,k){ return s+db.etiquetas.porDisciplina[k].length; },0);
+  var totalFrases = contarFrases(db.etiquetas.geral) + contarFrases(db.etiquetas.ocoFato)
+    + chavesDisc.reduce(function(s,k){ return s+contarFrases(db.etiquetas.porDisciplina[k]); },0);
+  $("#qtdEtiq").textContent = totalEtiq+" etiquetas em "+(2+chavesDisc.length)+" conjuntos, "+totalFrases+" frases prontas.";
 
   var bytes = tamanhoDb();
   var pc = Math.min(100, Math.round(bytes/LIMITE*100));
@@ -2477,15 +2499,19 @@ function formTurma(tid){
 
 function conjuntoEtiq(chave){
   if(chave === "geral") return db.etiquetas.geral;
+  if(chave === "ocoFato") return db.etiquetas.ocoFato;
   if(!db.etiquetas.porDisciplina[chave]) db.etiquetas.porDisciplina[chave] = [];
   return db.etiquetas.porDisciplina[chave];
 }
 function gravarConjuntoEtiq(chave, lista){
   if(chave === "geral") db.etiquetas.geral = lista;
+  else if(chave === "ocoFato") db.etiquetas.ocoFato = lista;
   else db.etiquetas.porDisciplina[chave] = lista;
 }
 function padraoConjuntoEtiq(chave){
-  return chave === "geral" ? ETIQUETAS_PADRAO.slice() : (ETIQUETAS_POR_DISCIPLINA[chave] || []).slice();
+  if(chave === "geral") return ETIQUETAS_PADRAO.slice();
+  if(chave === "ocoFato") return ETIQUETAS_OCO_FATO_PADRAO.slice();
+  return (ETIQUETAS_POR_DISCIPLINA[chave] || []).slice();
 }
 function abrirEditorEtiq(chave){
   var texto = conjuntoEtiq(chave).map(function(e){ return e.rot+" :: "+e.frases.join(" | "); }).join("\n\n");
@@ -2495,7 +2521,9 @@ function abrirEditorEtiq(chave){
     + '<select id="etConjunto">' + DISCIPLINAS_ETIQ.map(function(x){
         return '<option value="'+x.chave+'"'+(x.chave===chave?" selected":"")+'>'+esc(x.nome)+'</option>';
       }).join("") + '</select>'
-    + '<p class="nota">O conjunto geral aparece somado ao da disciplina em toda tela de registro.</p>'
+    + '<p class="nota">'+(chave==="ocoFato"
+        ? "Estas frases aparecem como etiquetas rápidas no campo Fato observado do formulário de ocorrência."
+        : "O conjunto geral aparece somado ao da disciplina em toda tela de registro.")+'</p>'
     + '<p class="quem">Uma etiqueta por bloco. O rótulo vem antes de dois-pontos duplos e as variações são separadas por barra vertical.</p>'
     + '<textarea id="etTxt" style="min-height:300px;font-size:13.5px">'+esc(texto)+'</textarea>'
     + '<p class="nota">Escreva no mesmo tom que você usaria num parecer. O texto vai direto para a pasta impressa.</p>'
