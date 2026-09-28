@@ -104,6 +104,10 @@ ok("S.21 previa traz a turma", /6 Ano A/.test(i.q("#dcPrevia").textContent), i.q
 ok("S.22 tem copiar e compartilhar", !!i.q("#dcCopiar") && !!i.q("#dcEnviar"));
 i.clique("#dcCopiar");
 ok("S.23 copia o texto do documento", i.w.__copiou===true);
+ok("S.23b previa do mapa traz o rodape com o professor",
+  i.q("#dcPrevia").textContent.indexOf(i.db().cfg.prof)>=0);
+ok("S.23c previa do mapa tem varias linhas, nao um bloco so",
+  i.q("#dcPrevia").textContent.split("\n").length>4);
 
 /* impressao normal nao incomoda */
 let ni=base(app());
@@ -111,6 +115,51 @@ ni.aba("notas");
 ni.clique("#btImpNotas");
 ok("S.24 no modo normal imprime direto", ni.w.__imprimiu===true);
 ok("S.25 sem painel extra no modo normal", !ni.q("#dcPrevia"));
+
+/* --- texto de compartilhar da ocorrencia, formatado e completo --- */
+let io=base(app({url:"blob:https://x/y", printBloqueado:true}));
+io.aba("oco"); io.clique("#btNovaOco");
+io.escreve("#oFato","Recusou-se a devolver o material emprestado ao colega de turma.");
+io.escreve("#oProv","Conversa reservada ao final da aula.");
+io.clique("#oOk");
+io.clique("#oImp");
+const previaOco = io.q("#dcPrevia").textContent;
+ok("S.26 previa da ocorrencia traz escola, turma e disciplina no cabecalho",
+  /Maria Barreto/.test(previaOco) && /6 Ano A/.test(previaOco) && /Educação Física/.test(previaOco));
+ok("S.27 previa da ocorrencia traz o fato observado por extenso",
+  previaOco.indexOf("Recusou-se a devolver o material emprestado ao colega de turma.")>=0);
+ok("S.28 previa da ocorrencia traz o rodape com o professor",
+  previaOco.indexOf(io.db().cfg.prof)>=0);
+ok("S.29 previa da ocorrencia tem varias linhas", previaOco.split("\n").length>4);
+
+/* --- texto de compartilhar da pasta do aluno, formatado e completo --- */
+let ip=base(app({url:"blob:https://x/y", printBloqueado:true}));
+ip.aba("alunos");
+const alunoIdIp = ip.db().turmas[0].alunos[0].id;
+ip.q('#listaAlunos button[data-pasta="'+alunoIdIp+'"]').click();
+ip.clique("#pImp");
+const previaPasta = ip.q("#dcPrevia").textContent;
+ok("S.30 previa da pasta traz escola, turma e disciplina no cabecalho",
+  /Maria Barreto/.test(previaPasta) && /6 Ano A/.test(previaPasta) && /Educação Física/.test(previaPasta));
+ok("S.31 previa da pasta traz o nome do aluno", /Ana Silva/.test(previaPasta));
+ok("S.32 previa da pasta traz o rodape com o professor", previaPasta.indexOf(ip.db().cfg.prof)>=0);
+
+/* --- compartilhar usa o menu nativo quando o aparelho oferece --- */
+let sc=base(app({url:"blob:https://x/y", printBloqueado:true}));
+sc.w.navigator.share = function(dados){ sc.w.__compartilhado = dados; return Promise.resolve(); };
+sc.aba("notas"); sc.clique("#btImpNotas");
+const textoEsperado = sc.q("#dcPrevia").textContent;
+sc.clique("#dcEnviar");
+ok("S.33 aciona o compartilhamento nativo com o texto formatado",
+  !!sc.w.__compartilhado && sc.w.__compartilhado.text===textoEsperado);
+
+/* --- sem compartilhamento nativo, cai para copiar e avisa --- */
+let sf=base(app({url:"blob:https://x/y", printBloqueado:true}));
+sf.aba("notas"); sf.clique("#btImpNotas");
+sf.clique("#dcEnviar");
+ok("S.34 sem menu nativo, copia o texto sozinho", sf.w.__copiou===true);
+ok("S.35 avisa para colar na conversa do WhatsApp",
+  (sf.w.__a||[]).some(m=>/colar/i.test(m) && /WhatsApp/i.test(m)), JSON.stringify(sf.w.__a));
 
 console.log("Passaram: "+p); console.log("Falharam: "+f.length);
 f.forEach(x=>console.log("  FALHA "+x));

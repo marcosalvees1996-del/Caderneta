@@ -1878,10 +1878,19 @@ function textoPlano(){
   var t = $("#doc").innerText || $("#doc").textContent || "";
   return t.replace(/\n{3,}/g,"\n\n").trim();
 }
-function imprimirDoc(){
+function cabecalhoTexto(titulo, e, t, d, linhaData){
+  var partes = [titulo.toUpperCase()];
+  var identif = [e?e.nome:"", t?t.nome:"", d?d.nome:""].filter(Boolean).join(" · ");
+  if(identif) partes.push(identif);
+  if(linhaData) partes.push(linhaData);
+  return partes.join("\n");
+}
+function rodapeTexto(){ return db.cfg.prof||""; }
+function imprimirDoc(textoShare){
   var deu = false;
   try{ window.print(); deu = true; }catch(e){ deu = false; }
   if(deu && !contextoRestrito()) return;
+  var texto = textoShare || textoPlano();
   abrir(
     '<h3>Imprimir ou enviar</h3>'
     + '<p class="quem">A impressão direta pode estar bloqueada neste modo de abertura. Use uma das saídas abaixo.</p>'
@@ -1893,27 +1902,42 @@ function imprimirDoc(){
     + '<p class="nota">Copiando o texto você cola direto no WhatsApp da coordenação ou num documento.</p>'
     + '<div class="previa" id="dcPrevia"></div>'
   );
-  $("#dcPrevia").textContent = textoPlano();
+  $("#dcPrevia").textContent = texto;
   $("#dcNao").addEventListener("click", fechar);
   $("#dcImp").addEventListener("click", function(){
     try{ window.print(); }catch(e){ avisar("O navegador recusou a impressão neste modo."); }
   });
   $("#dcCopiar").addEventListener("click", function(){
     var b = this;
-    copiarTexto(textoPlano(), function(){
+    copiarTexto(texto, function(){
       b.textContent = "Copiado";
       setTimeout(function(){ b.textContent = "Copiar texto"; }, 2000);
     }, function(){ avisar("Selecione o texto da prévia abaixo e copie à mão."); });
   });
   $("#dcEnviar").addEventListener("click", function(){
     if(navigator.share){
-      navigator.share({ title:"Documento da Caderneta", text:textoPlano() }).then(function(){},function(){});
+      navigator.share({ title:"Documento da Caderneta", text:texto }).then(function(){},function(){});
     }else{
-      avisar("Este navegador não oferece compartilhamento. Use Copiar texto.");
+      copiarTexto(texto, function(){
+        avisar("Este aparelho não oferece o menu de compartilhar. O texto já foi copiado: é só colar na conversa do WhatsApp.");
+      }, function(){
+        avisar("Este navegador não oferece compartilhamento nem cópia automática. Selecione o texto da prévia abaixo e copie à mão.");
+      });
     }
   });
 }
 
+function textoCompartilharOco(r, texto){
+  var t = turmaDe(r.discId), d = disciplina(r.discId), e = escolaDe(r.discId);
+  var linhaData = br(r.data) + (r.hora ? ", "+r.hora : "");
+  return [
+    cabecalhoTexto("Registro de ocorrência escolar", e, t, d, linhaData),
+    "",
+    texto,
+    "",
+    rodapeTexto()
+  ].join("\n");
+}
 function imprimirOco(r, texto){
   var t = turmaDe(r.discId), d = disciplina(r.discId);
   var a = t ? t.alunos.filter(function(x){ return x.id===r.alunoId; })[0] : null;
@@ -1928,9 +1952,29 @@ function imprimirOco(r, texto){
     + ((r.fotos&&r.fotos.length)?'<p class="campo"><b>Anexos:</b></p>'+r.fotos.map(function(s){return '<img src="'+s+'" alt="">';}).join(""):'')
     + '<div class="assina"><div>'+esc(db.cfg.prof||"Professor")+'</div><div>Coordenação</div><div>Responsável pelo estudante</div></div>'
     + rodapeDoc();
-  imprimirDoc();
+  imprimirDoc(textoCompartilharOco(r, texto));
 }
 
+function textoCompartilharPasta(aid){
+  var a = aluno(discAtual, aid), t = turmaDe(discAtual), d = disciplina(discAtual), e = escolaDe(discAtual);
+  var r = regsDe(discAtual, aid).slice().reverse();
+  var partic = r.filter(function(x){ return x.tipo==="participacao"; }).length;
+  var corpo = r.length ? r.map(function(x){
+    return br(x.data)+" · "+(x.tipo==="ocorrencia"?"Ocorrência":"Participação")+". "
+      + (x.texto||"Participação registrada em aula.")
+      + (x.providencia?" Providência: "+x.providencia:"");
+  }).join("\n") : "Sem registros.";
+  return [
+    cabecalhoTexto("Registro de acompanhamento do estudante", e, t, d, "Emitido em "+br(hoje())),
+    "",
+    "Estudante: "+a.nome,
+    "Participações registradas: "+partic,
+    "",
+    corpo,
+    "",
+    rodapeTexto()
+  ].join("\n");
+}
 function imprimirPasta(aid){
   var a = aluno(discAtual, aid), t = turmaDe(discAtual), d = disciplina(discAtual);
   var r = regsDe(discAtual, aid).slice().reverse();
@@ -1948,9 +1992,24 @@ function imprimirPasta(aid){
       }).join("") : '<p>Sem registros.</p>')
     + '</div><div class="assina"><div>'+esc(db.cfg.prof||"Professor")+'</div><div>Coordenação</div></div>'
     + rodapeDoc();
-  imprimirDoc();
+  imprimirDoc(textoCompartilharPasta(aid));
 }
 
+function textoCompartilharNotas(r, p, t, d, media, abaixo){
+  var e = escolaDe(discAtual);
+  var linhas = r.linhas.map(function(l){
+    return l.aluno.nome+": "+fmt(l.e1)+" + "+fmt(l.e2)+" + "+fmt(l.e3)+" = "+fmt(l.total);
+  }).join("\n");
+  return [
+    cabecalhoTexto("Mapa de notas do "+bimAtual+"º bimestre", e, t, d,
+      "Período: "+br(p.ini)+" a "+br(p.fim)+", "+r.totalAulas+" aulas registradas"),
+    "Média da turma: "+fmt(media)+" · Abaixo de 6: "+abaixo.length+" de "+r.linhas.length,
+    "",
+    linhas,
+    "",
+    rodapeTexto()
+  ].join("\n");
+}
 $("#btImpNotas").addEventListener("click", function(){
   var r = calcular(); if(!r) return;
   var p = periodo() || {ini:"",fim:""};
@@ -1978,7 +2037,7 @@ $("#btImpNotas").addEventListener("click", function(){
       }).join("")
     + '</table><div class="assina"><div>'+esc(db.cfg.prof||"Professor")+'</div><div>Coordenação</div></div>'
     + rodapeDoc();
-  imprimirDoc();
+  imprimirDoc(textoCompartilharNotas(r, p, t, d, media, abaixo));
 });
 
 function avisoEspaco(){
