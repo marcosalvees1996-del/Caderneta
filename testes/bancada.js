@@ -197,12 +197,14 @@ const tOco = app.q("#oTxt") ? app.q("#oTxt").value : "";
 ok("9.2 texto formal montado", /Aos \d{2}\/\d{2}\/\d{4}/.test(tOco) && /Coordenação pedagógica/.test(tOco), tOco.slice(0,60));
 ok("9.3 nome do aluno no texto", tOco.includes("Bruno Teixeira"));
 app.clique("#oImp");
+ok("9.3b tela de imprimir ou enviar aparece", /Imprimir ou enviar/.test(app.q("#caixa").textContent));
+app.clique("#dcImp");
 ok("9.4 documento impresso gerado", app.w.__imprimiu === true);
 ok("9.5 assinatura no documento", /Responsável pelo estudante/.test(app.q("#doc").innerHTML));
 ok("9.6 escola certa no cabecalho", /Maria Barreto/.test(app.q("#doc").innerHTML));
 
 // validacao do formulario
-app.clique("#oFech");
+app.clique("#dcNao");
 app.clique("#btNovaOco");
 app.escreve("#oFato","curto");
 app.clique("#oOk");
@@ -276,8 +278,11 @@ ok("13.4 grafico na pasta", app.todos("#grPart svg, .gr svg").length>=1);
 ok("13.5 registros listados", app.todos(".entrada").length>=1);
 app.w.__imprimiu = false;
 app.clique("#pImp");
+app.clique("#dcImp");
 ok("13.6 imprime pasta", app.w.__imprimiu===true);
 ok("13.7 foto de perfil fora do impresso", !/av-g|pAv/.test(app.q("#doc").innerHTML));
+app.clique("#dcNao");
+app.q('#listaAlunos button[data-pasta="'+alunoIds[0]+'"]').click();
 
 /* ============ 14. apagar registro ============ */
 const antes = app.db().registros.length;

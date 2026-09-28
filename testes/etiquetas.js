@@ -215,7 +215,7 @@ ok("D.9 texto cita versao do estudante", /estudante relatou.*celular estava toca
 
 e.q("#oImp").click();
 ok("D.10 documento impresso mostra reincidencia", /Reincidência:<\/b> Sim/.test(e.q("#doc").innerHTML));
-e.q("#oFech").click();
+e.q("#dcNao").click();
 
 /* ocorrencia enxuta omite as secoes vazias */
 e.clique("#btNovaOco");

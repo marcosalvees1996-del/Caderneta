@@ -220,6 +220,7 @@ let app8 = base();
 app8.aba("notas");
 app8.w.__imprimiu = false;
 app8.clique("#btImpNotas");
+app8.clique("#dcImp");
 ok("K.1 mapa impresso", app8.w.__imprimiu===true);
 const doc = app8.q("#doc").innerHTML;
 ok("K.2 tres eixos no cabecalho da tabela", /Avaliação livre/.test(doc)&&/Prova de bloco/.test(doc)&&/Intensificação/.test(doc));

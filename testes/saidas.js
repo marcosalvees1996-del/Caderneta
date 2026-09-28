@@ -108,13 +108,18 @@ ok("S.23b previa do mapa traz o rodape com o professor",
   i.q("#dcPrevia").textContent.indexOf(i.db().cfg.prof)>=0);
 ok("S.23c previa do mapa tem varias linhas, nao um bloco so",
   i.q("#dcPrevia").textContent.split("\n").length>4);
+i.clique("#dcImp");
+ok("S.23d tentar imprimir dentro da tela avisa quando a impressao esta bloqueada",
+  (i.w.__a||[]).some(m=>/recusou a impressão/.test(m)));
 
-/* impressao normal nao incomoda */
+/* --- no modo normal a tela tambem aparece, e imprimir funciona --- */
 let ni=base(app());
 ni.aba("notas");
 ni.clique("#btImpNotas");
-ok("S.24 no modo normal imprime direto", ni.w.__imprimiu===true);
-ok("S.25 sem painel extra no modo normal", !ni.q("#dcPrevia"));
+ok("S.24 tela de imprimir ou enviar aparece tambem no modo normal",
+  /Imprimir ou enviar/.test(ni.q("#caixa").textContent) && !!ni.q("#dcEnviar"));
+ni.clique("#dcImp");
+ok("S.25 imprimir funciona ao escolher dentro da tela", ni.w.__imprimiu===true);
 
 /* --- texto de compartilhar da ocorrencia, formatado e completo --- */
 let io=base(app({url:"blob:https://x/y", printBloqueado:true}));

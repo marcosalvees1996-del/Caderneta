@@ -138,7 +138,7 @@ const espera=ms=>new Promise(r=>setTimeout(r,ms));
   ok("P.15 ocorrencia com anexo salva", oco&&oco.fotos.length===1);
   q("#oImp").click();
   ok("P.16 anexo entra no documento", /<img/.test(q("#doc").innerHTML));
-  q("#oFech").click();
+  q("#dcNao").click();
 
   /* foto de perfil nunca vai para o impresso */
   aba("alunos");

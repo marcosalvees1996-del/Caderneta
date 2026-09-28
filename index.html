@@ -1887,15 +1887,12 @@ function cabecalhoTexto(titulo, e, t, d, linhaData){
 }
 function rodapeTexto(){ return db.cfg.prof||""; }
 function imprimirDoc(textoShare){
-  var deu = false;
-  try{ window.print(); deu = true; }catch(e){ deu = false; }
-  if(deu && !contextoRestrito()) return;
   var texto = textoShare || textoPlano();
   abrir(
     '<h3>Imprimir ou enviar</h3>'
-    + '<p class="quem">A impressão direta pode estar bloqueada neste modo de abertura. Use uma das saídas abaixo.</p>'
+    + '<p class="quem">Escolha como usar este documento.</p>'
     + '<div class="acoes">'
-    + '<button class="bt forte" id="dcImp">Tentar imprimir</button>'
+    + '<button class="bt forte" id="dcImp">Imprimir</button>'
     + '<button class="bt" id="dcCopiar">Copiar texto</button>'
     + '<button class="bt" id="dcEnviar">Compartilhar</button>'
     + '<button class="bt" id="dcNao">Fechar</button></div>'
