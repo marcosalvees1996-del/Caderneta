@@ -773,7 +773,8 @@ var ETIQUETAS_OCO_FATO_PADRAO = [
   {rot:"Não apresentou atividade de casa", frases:[
     "Não apresentou a atividade de casa solicitada pelo professor.",
     "Não entregou a atividade de casa na data estabelecida, mesmo após orientação.",
-    "Compareceu à aula sem a atividade de casa solicitada, sendo orientado sobre a importância do cumprimento das atividades."]}
+    "Compareceu à aula sem a atividade de casa solicitada, sendo orientado sobre a importância do cumprimento das atividades."]},
+  {rot:"Briga na presença do professor", frases:["Alunos brigaram na presença do professor durante a aula."]}
 ];
 var ETIQUETAS_OCO_PROV = [
   {rot:"Conversa reservada", texto:"Conversa reservada com o(a) estudante ao final da aula, orientando sobre [o que]."},
@@ -870,7 +871,7 @@ function migrarEixos(){
 }
 
 function migrarEtiquetas(){
-  if(db.versaoEtiquetas === 2) return;
+  if(db.versaoEtiquetas === 3) return;
   if(Array.isArray(db.etiquetas)){
     db.etiquetas = { geral: db.etiquetas, porDisciplina:{} };
   }
@@ -881,7 +882,10 @@ function migrarEtiquetas(){
     if(!db.etiquetas.porDisciplina[k]) db.etiquetas.porDisciplina[k] = ETIQUETAS_POR_DISCIPLINA[k].slice();
   });
   if(!db.etiquetas.ocoFato) db.etiquetas.ocoFato = ETIQUETAS_OCO_FATO_PADRAO.slice();
-  db.versaoEtiquetas = 2;
+  if(!db.etiquetas.ocoFato.some(function(e){ return e.rot === "Briga na presença do professor"; })){
+    db.etiquetas.ocoFato.push(ETIQUETAS_OCO_FATO_PADRAO[ETIQUETAS_OCO_FATO_PADRAO.length-1]);
+  }
+  db.versaoEtiquetas = 3;
   gravar();
 }
 migrar();
@@ -1935,12 +1939,15 @@ function verOco(rid){
   abrir(
     '<h3>Ocorrência</h3><p class="quem">'+esc(a?a.nome:"")+' · '+br(r.data)+'</p>'
     + '<textarea id="oTxt" style="min-height:190px">'+esc(textoOco(r))+'</textarea>'
-    + '<p class="nota">Você pode ajustar o texto antes de imprimir ou copiar.</p>'
+    + '<p class="nota">Você pode ajustar o texto antes de imprimir, copiar ou gerar o PDF.</p>'
     + ((r.fotos&&r.fotos.length)?'<div class="fotos">'+r.fotos.map(function(s){return '<figure><img src="'+s+'" alt=""></figure>';}).join("")+'</div>':'')
     + '<div class="acoes"><button class="bt forte" id="oImp">Imprimir</button>'
+    + '<button class="bt forte" id="oPdfShare">Compartilhar PDF</button>'
+    + '<button class="bt" id="oPdfDownload">Baixar PDF</button>'
     + '<button class="bt" id="oCop">Copiar texto</button>'
     + '<button class="bt perigo" id="oDel">Apagar</button>'
     + '<button class="bt" id="oFech">Fechar</button></div>'
+    + '<p class="nota">Compartilhar PDF abre o menu do celular: escolha o WhatsApp e o destinatário. O PDF contém o texto, sem fotos ou anexos. Confira os dados antes de enviar.</p>'
   );
   $("#oFech").addEventListener("click", fechar);
   $("#oCop").addEventListener("click", function(){
@@ -1955,6 +1962,93 @@ function verOco(rid){
     }, "Apagar");
   });
   $("#oImp").addEventListener("click", function(){ imprimirOco(r, $("#oTxt").value); });
+  $("#oPdfShare").addEventListener("click", function(){ enviarPdfOco(r, $("#oTxt").value, true); });
+  $("#oPdfDownload").addEventListener("click", function(){ enviarPdfOco(r, $("#oTxt").value, false); });
+}
+
+/* PDF de texto, gerado no aparelho sem biblioteca, rede ou fotos de alunos.
+   Courier/WinAnsi mantém acentos portugueses e permite paginação previsível. */
+function pdfHex(s){
+  var especiais = {8364:128,8218:130,402:131,8222:132,8230:133,8224:134,8225:135,
+    710:136,8240:137,352:138,8249:139,338:140,381:142,8216:145,8217:146,
+    8220:147,8221:148,8226:149,8211:150,8212:151,732:152,8482:153,
+    353:154,8250:155,339:156,382:158,376:159};
+  var out = "";
+  Array.from(String(s).normalize("NFC")).forEach(function(c){
+    var n = c.codePointAt(0);
+    n = especiais[n] || (n >= 32 && n <= 255 ? n : 63);
+    out += ("0"+n.toString(16)).slice(-2);
+  });
+  return out;
+}
+function gerarPdfOco(r, texto){
+  var completo = textoCompartilharOco(r, texto) + "\n\nAssinaturas:\n\n"
+    + (db.cfg.prof||"Professor") + "\n\nCoordenação\n\nResponsável pelo estudante";
+  var linhas = [];
+  completo.replace(/\r/g,"").split("\n").forEach(function(p){
+    var atual = "";
+    p.split(/\s+/).filter(Boolean).forEach(function(palavra){
+      while(palavra.length > 75){
+        if(atual){ linhas.push(atual); atual = ""; }
+        linhas.push(palavra.slice(0,75)); palavra = palavra.slice(75);
+      }
+      if(atual && atual.length+palavra.length+1 > 75){ linhas.push(atual); atual = ""; }
+      atual += (atual?" ":"")+palavra;
+    });
+    linhas.push(atual);
+  });
+  var paginas = Math.max(1, Math.ceil(linhas.length/46)), objetos = [];
+  objetos[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+  var filhos = [];
+  for(var p=0;p<paginas;p++) filhos.push((4+p*2)+" 0 R");
+  objetos[2] = "<< /Type /Pages /Count "+paginas+" /Kids ["+filhos.join(" ")+"] >>";
+  objetos[3] = "<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>";
+  for(var i=0;i<paginas;i++){
+    var pagina = 4+i*2, conteudo = pagina+1;
+    var fluxo = "BT /F1 11 Tf 15 TL 48 788 Td\n";
+    linhas.slice(i*46,(i+1)*46).forEach(function(l){ fluxo += "<"+pdfHex(l)+"> Tj T*\n"; });
+    fluxo += "ET\nBT /F1 9 Tf 48 40 Td <"+pdfHex("Página "+(i+1)+" de "+paginas)+"> Tj ET\n";
+    objetos[pagina] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents "+conteudo+" 0 R >>";
+    objetos[conteudo] = "<< /Length "+fluxo.length+" >>\nstream\n"+fluxo+"endstream";
+  }
+  var pdf = "%PDF-1.4\n", offsets = [0];
+  for(var j=1;j<objetos.length;j++){
+    offsets[j] = pdf.length;
+    pdf += j+" 0 obj\n"+objetos[j]+"\nendobj\n";
+  }
+  var xref = pdf.length;
+  pdf += "xref\n0 "+objetos.length+"\n0000000000 65535 f \n";
+  for(var k=1;k<objetos.length;k++) pdf += ("0000000000"+offsets[k]).slice(-10)+" 00000 n \n";
+  pdf += "trailer\n<< /Size "+objetos.length+" /Root 1 0 R >>\nstartxref\n"+xref+"\n%%EOF\n";
+  return new Blob([pdf], {type:"application/pdf"});
+}
+function baixarPdfOco(blob, nome){
+  var url = URL.createObjectURL(blob), link = document.createElement("a");
+  link.href = url; link.download = nome; document.body.appendChild(link);
+  link.click(); link.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); },60000);
+}
+function enviarPdfOco(r, texto, compartilhar){
+  if(!String(texto||"").trim()){ avisar("O texto da ocorrência está vazio. Preencha antes de gerar o PDF."); return; }
+  try{
+    var blob = gerarPdfOco(r, texto);
+    var nome = "ocorrencia-"+String(r.data||"registro").replace(/[^0-9-]/g,"")+"-"+String(r.id||"").replace(/[^a-zA-Z0-9_-]/g,"")+".pdf";
+    if(compartilhar && navigator.share && navigator.canShare && typeof File !== "undefined"){
+      var arquivo = new File([blob], nome, {type:"application/pdf"});
+      if(navigator.canShare({files:[arquivo]})){
+        navigator.share({files:[arquivo], title:"Registro de ocorrência escolar"}).catch(function(e){
+          if(e && e.name === "AbortError") return;
+          baixarPdfOco(blob,nome);
+          avisar("Não foi possível compartilhar. O PDF foi preparado para download. No WhatsApp, anexe como Documento pela pasta de downloads ou Arquivos.");
+        });
+        return;
+      }
+    }
+    baixarPdfOco(blob,nome);
+    if(compartilhar) avisar("Este navegador não permite compartilhar arquivos diretamente. Salve o PDF e, no WhatsApp, anexe como Documento pela pasta de downloads ou Arquivos.");
+  }catch(e){
+    avisar("Não foi possível gerar ou enviar o PDF. Tente Baixar PDF ou use Imprimir para salvar como PDF.");
+  }
 }
 
 /* ================= impressão ================= */
