@@ -2,7 +2,7 @@
    guarda o essencial para abrir offline; tenta a rede primeiro,
    cai para o cache quando nao ha sinal. Nao toca em localStorage:
    isso nao existe neste escopo. */
-var CACHE = "caderneta-v2";
+var CACHE = "caderneta-visual-2026-10";
 var ARQUIVOS = [
   "./",
   "./index.html",

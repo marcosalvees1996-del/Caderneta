@@ -322,6 +322,92 @@ textarea{min-height:88px;resize:vertical}
   .aluno .nome, .bt, .et,
   nav button svg, nav button .rotulo{ transition:none }
 }
+
+/* Visual aprovado: mesma aplicação, dados e ações, sem dependências externas. */
+:root{
+  --papel:#F2F1EA;--papel-alt:#E8E7DE;--tinta:#202B31;--tinta-fraca:#627078;
+  --linha:#D6D9D2;--verde:#2F7258;--verde-claro:#E2EEE7;--verde-borda:#BFD6C7;
+  --tijolo-claro:#F4E9E6;--azul:#43525E;--trilho:#E8E7DE;
+  --sombra-1:0 2px 7px rgba(32,43,49,.07),0 1px 2px rgba(32,43,49,.04);
+}
+body{font-size:15px;line-height:1.4}
+header{background:#FFFEFA;padding-bottom:13px}
+.topo{max-width:760px;margin:0 auto;align-items:flex-end;padding:13px 18px 10px}
+.ctxEscola{font-size:12px;margin-bottom:10px}
+.ctxTurma{font-size:23px;line-height:1.1;font-weight:700;letter-spacing:-.6px}
+.ctxDisc{display:block;margin-top:5px;color:var(--tinta-fraca);font-size:13px;font-weight:400;letter-spacing:0}
+.ctxSeparador{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.dia input[type=date]{width:126px;height:44px;font-size:12px;background:var(--papel);border-radius:10px}
+#selCtx{max-width:724px;margin:0 auto;width:calc(100% - 36px);height:44px;background:#FFFEFA;border-radius:9px}
+header .modo{max-width:760px;margin:0 auto}
+main{max-width:760px;margin:0 auto;padding:15px 16px 20px}
+h2{font-size:20px;line-height:1.18;letter-spacing:-.45px}
+.sobretitulo{margin:0 0 5px;color:var(--verde);font-size:11px;letter-spacing:.04em;font-weight:700}
+.sobretitulo+h2{margin-top:0}
+.dica{font-size:13px;margin:5px 0 16px}
+.hoje{margin-bottom:14px}
+.hojeLinha{align-items:center;margin-bottom:11px;font-size:12px}
+.hojeTxt,.hojeTxt b{color:var(--tinta);font-size:15px;font-weight:700}
+.hojeToques b{color:var(--tinta-fraca);font-weight:400}
+.hojeBarra{height:6px;border-radius:9px}
+.hojeBarra i{width:0}
+input.busca{height:46px;background-color:#FFFEFA;border-radius:11px;padding-left:40px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23627078' stroke-width='1.8'%3E%3Ccircle cx='10.8' cy='10.8' r='6.8'/%3E%3Cpath d='m16 16 4.5 4.5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:13px center;background-size:18px}
+.grade{gap:7px}
+.aluno{min-height:62px;padding:6px 8px 6px 10px;border:1px solid rgba(214,217,210,.7);border-radius:13px;background:#FFFEFA;gap:10px}
+.aluno.pontuou{border-color:var(--verde-borda)}
+.aluno.faltou{background:#EEEDE7;opacity:1}
+.aluno .nome{width:100%;min-height:46px;font-size:14px;font-weight:600;line-height:1.25;white-space:normal}
+.aluno .nomeTexto{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aluno .sub{font-size:11.5px;font-weight:400;line-height:1.4}
+.aluno .cont{width:30px;height:30px;font-weight:700}
+.aluno .mais{background:var(--papel);color:var(--azul)}
+.av-p{width:38px;height:38px;border:0}
+.av svg circle,.av svg path{opacity:0}
+.av svg text{fill:#43525E;font-size:32px}
+.bt{min-height:46px;border-radius:10px;background:#FFFEFA;font-size:13px}
+.bt.forte{background:var(--azul)}
+.acoes{gap:8px;margin:14px 0 4px}
+#ab-aula>.acoes #btDesfazer{flex:1}
+.faixa{border-radius:10px}
+.faixa button{min-height:44px}
+nav{width:calc(100% - 28px);max-width:520px;bottom:calc(10px + env(safe-area-inset-bottom));
+  display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:6px;border-radius:17px;
+  background:rgba(255,254,250,.97);box-shadow:0 8px 20px rgba(32,43,49,.15)}
+nav button{min-width:0;min-height:50px;flex-direction:column;gap:3px;border-radius:12px;padding:5px 0;font-size:11px}
+nav button svg{width:19px;height:19px}
+nav button.on{background:var(--papel-alt);font-weight:700}
+nav button .rotulo{position:static;transform:none;background:none;color:inherit;font-size:11px;font-weight:inherit;
+  padding:0;opacity:1;line-height:1.2;pointer-events:none;transition:none}
+nav button .rotulo::after{display:none}
+nav button:active .rotulo{transform:none}
+.periodoNotas{display:grid;grid-template-columns:1fr 1fr;padding:11px;gap:10px;
+  border:1px solid var(--linha);border-radius:12px;background:#FFFEFA;margin:12px 0}
+.periodoNotas .periodoBimestre{grid-column:1 / -1;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.periodoNotas .periodoBimestre label{margin:0;font-size:12px;font-weight:600}
+.periodoNotas .periodoBimestre select{flex:none;width:auto;min-width:124px;background:var(--papel);font-size:13px}
+.periodoNotas .periodoData{margin:0;min-width:0;font-size:11px;font-weight:600}
+.periodoNotas input[type=date]{display:block;width:100%;min-width:0;height:44px;margin-top:4px;padding:0 5px;font-size:12px;background:var(--papel)}
+#ab-notas .conselho{background:var(--verde-claro);border-left:4px solid var(--verde);border-radius:0 10px 10px 0;box-shadow:none}
+#cxPesos{border:1px solid var(--linha);border-radius:11px;background:#FFFEFA;padding:0 12px}
+#cxPesos>summary{min-height:45px;display:flex;align-items:center}
+.cab-notas{font-size:11px;line-height:1.2}
+.cab-notas span{overflow-wrap:break-word}
+.linha-nota .notinhas input[type=text]{height:44px;background:#FFFEFA}
+.linha-nota .abrir-al{min-height:44px}
+.et{min-height:44px;background:#FFFEFA}
+.painel .caixa{max-width:760px;margin:0 auto}
+.dialogo .dcaixa{background:var(--papel)}
+button:focus-visible{outline:3px solid #63849B;outline-offset:2px}
+@media(max-width:365px){
+  .topo{padding-left:14px;padding-right:14px}main{padding-left:12px;padding-right:12px}
+  nav button .rotulo{font-size:10px}
+  .linha-nota .notinhas input[type=text]{width:44px;min-width:44px;flex-basis:44px}
+  .cab-notas span{flex-basis:44px}
+  .linha-nota .abrir-al>.av{display:none}
+}
+@media print{body{font-size:12pt}main{display:none !important}}
 </style>
 </head>
 <body>
@@ -333,7 +419,7 @@ textarea{min-height:88px;resize:vertical}
       <div class="ctxEscola" id="ctxEscola"></div>
       <div class="ctxTurma" id="ctxTurma">Nenhuma aula selecionada</div>
     </div>
-    <div class="dia"><input type="date" id="selData"></div>
+    <div class="dia"><input type="date" id="selData" aria-label="Data da aula"></div>
   </div>
   <select id="selCtx" aria-label="Escolher turma e disciplina"></select>
   <div class="modo" id="modo"></div>
@@ -342,6 +428,9 @@ textarea{min-height:88px;resize:vertical}
 <main>
 
 <section id="ab-aula" class="on">
+  <p class="sobretitulo">Registro de aula</p>
+  <h2>Participação da turma</h2>
+  <p class="dica">Toque no nome para registrar. Um toque, um registro. O botão ao lado abre etiquetas, descrição e fotos.</p>
   <div class="hoje">
     <div class="hojeLinha">
       <span class="hojeTxt"><b id="rAlunos">0</b> de <b id="rTurma">0</b> alunos com registro hoje</span>
@@ -349,8 +438,7 @@ textarea{min-height:88px;resize:vertical}
     </div>
     <div class="hojeBarra"><i id="hojeI"></i></div>
   </div>
-  <p class="dica">Toque no nome para somar participação. O ícone de nota abre etiquetas, descrição e fotos.</p>
-  <input type="text" class="busca" id="buscaAula" placeholder="Buscar aluno na turma">
+  <input type="text" class="busca" id="buscaAula" placeholder="Buscar aluno na turma" aria-label="Buscar aluno na turma">
   <div class="grade" id="grade"></div>
   <div class="acoes">
     <button class="bt" id="btFalta">Marcar faltas</button>
@@ -368,12 +456,13 @@ textarea{min-height:88px;resize:vertical}
 <section id="ab-notas">
   <h2>Fechamento do bimestre</h2>
   <p class="dica">Defina a divisão uma vez. As participações viram nota sozinhas.</p>
-  <div class="barra" style="margin-bottom:12px">
-    <select id="selBim">
+  <div class="barra periodoNotas">
+    <div class="periodoBimestre"><label for="selBim">Período letivo</label><select id="selBim">
       <option value="1">1º bimestre</option><option value="2">2º bimestre</option>
       <option value="3">3º bimestre</option><option value="4">4º bimestre</option>
-    </select>
-    <input type="date" id="bimIni"><input type="date" id="bimFim">
+    </select></div>
+    <label class="periodoData" for="bimIni">Início<input type="date" id="bimIni"></label>
+    <label class="periodoData" for="bimFim">Fim<input type="date" id="bimFim"></label>
   </div>
   <div id="conselho"></div>
   <details id="cxPesos" style="margin-bottom:14px">
@@ -468,7 +557,7 @@ textarea{min-height:88px;resize:vertical}
 
 </main>
 
-<nav>
+<nav aria-label="Navegação principal">
   <button data-ab="aula" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="rotulo">Aula</span></button>
   <button data-ab="alunos"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.6-4 3.7-6 7.5-6s6.9 2 7.5 6"/></svg><span class="rotulo">Alunos</span></button>
   <button data-ab="notas"><svg viewBox="0 0 24 24"><path d="M5 3.5h14v17H5z"/><path d="M8.5 8.5h7M8.5 12.5h7M8.5 16.5h4"/></svg><span class="rotulo">Notas</span></button>
@@ -862,8 +951,9 @@ Array.prototype.forEach.call(botoes, function(b){
     var novoIdx = ORDEM_ABAS.indexOf(this.dataset.ab);
     var direcao = novoIdx > atualIdx ? "desliza-d" : "desliza-e";
 
-    Array.prototype.forEach.call(botoes, function(x){ x.classList.remove("on"); });
+    Array.prototype.forEach.call(botoes, function(x){ x.classList.remove("on"); x.removeAttribute("aria-current"); });
     this.classList.add("on");
+    this.setAttribute("aria-current", "page");
     Array.prototype.forEach.call(document.querySelectorAll("main section"), function(s){
       s.classList.remove("on","desliza-in","desliza-d","desliza-e");
     });
@@ -1011,7 +1101,7 @@ function pintarContexto(){
   document.documentElement.style.setProperty("--escola", cor);
   $("#faixaCor").style.background = cor;
   $("#ctxEscola").textContent = e ? e.nome : "Sem escola cadastrada";
-  $("#ctxTurma").textContent = (d && t) ? (t.nome + ", " + d.nome) : "Nenhuma aula selecionada";
+  $("#ctxTurma").innerHTML = (d && t) ? ('<span>'+esc(t.nome)+'</span><span class="ctxSeparador">, </span><span class="ctxDisc">'+esc(d.nome)+' · sala de aula</span>') : "Nenhuma aula selecionada";
 }
 $("#selCtx").addEventListener("change", function(){
   discAtual = this.value; filtroAula = ""; $("#buscaAula").value = "";
@@ -1021,7 +1111,7 @@ $("#selCtx").addEventListener("change", function(){
 $("#selData").addEventListener("change", function(){ dataAtual = this.value || hoje(); pintarAula(); });
 
 /* ================= avatar ================= */
-var PALETA_AVATAR = ["#4A5D8A","#3E7A66","#6B4F82","#8A6238","#3E6E86","#75662E"];
+var PALETA_AVATAR = ["#E7EBF0","#E3EEE6","#E8E5EF","#F1E9DC","#E3ECEC","#EEE9DF"];
 function iniciais(nome){
   var p = String(nome||"").trim().split(/\s+/);
   if(!p[0]) return "?";
@@ -1108,8 +1198,8 @@ function pintarAula(){
     var sub = l ? (l.participacoes+" part."+(l.faltas?" · "+l.faltas+" faltas":"")) : "";
     return '<div class="aluno'+(f?" faltou":(n?" pontuou":""))+'">'
       + (temOco?'<span class="flag"></span>':'') + avatar(a,"p")
-      + '<span class="info"><button class="nome" data-add="'+a.id+'">'+esc(a.nome)+'</button>'
-      + '<span class="sub">'+esc(sub)+'</span></span>'
+      + '<span class="info"><button class="nome" data-add="'+a.id+'" aria-label="'+(modoFalta?(f?'Desmarcar falta de ':'Marcar falta de '):'Registrar participação de ')+esc(a.nome)+'"><span class="nomeTexto">'+esc(a.nome)+'</span>'
+      + '<span class="sub">'+esc(sub)+'</span></button></span>'
       + '<span class="cont'+(f?" falta":(n?"":" zero"))+'">'+(f?"F":n)+'</span>'
       + '<button class="mais" data-det="'+a.id+'" aria-label="Detalhar participação de '+esc(a.nome)+'">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v10H9.5l-4 4v-4H4z" '
